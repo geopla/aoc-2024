@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.util.Collections.sort;
+
 
 public class Locations {
 
@@ -29,7 +31,13 @@ public class Locations {
     public static int totalDistance(List<Integer> groupOneLocations, List<Integer> groupTwoLocations) {
         final int toShorterListLength = Math.min(groupTwoLocations.size(), groupOneLocations.size());
 
-        return Stream.generate(new Zipper(groupOneLocations, groupTwoLocations))
+        // make the n-th smallest numbers accessible by simply sorting the locations - we are good with duplicates
+        ArrayList<Integer> groupOne = new ArrayList<>(groupOneLocations);
+        sort(groupOne);
+        ArrayList<Integer> groupTwo = new ArrayList<>(groupTwoLocations);
+        sort(groupTwo);
+
+        return Stream.generate(new Zipper(groupOne, groupTwo))
                 .limit(toShorterListLength)
                 .map(pair -> Math.abs(pair.x - pair.y))
                 .mapToInt(Integer::intValue)

@@ -8,9 +8,21 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LocationsTest {
+
+    @Test
+    @DisplayName("Should calculate the total distance of example from puzzle description")
+    void shouldCalculateTotalDistanceFromExample() {
+        final List<Integer> groupOneLocations = List.of(3, 4, 2, 1, 3, 3);
+        final List<Integer> groupTwoLocations = List.of(4, 3, 5, 3, 9, 3);
+
+        int totalDistance = Locations.totalDistance(groupOneLocations, groupTwoLocations);
+
+        assertThat(totalDistance).isEqualTo(11);
+    }
 
     @ParameterizedTest(name = "left: {0}, right: {1} distance: {2}")
     @CsvSource({
@@ -31,7 +43,7 @@ class LocationsTest {
     @Test
     @DisplayName("Should calculate the total distance of empty lists of locations")
     void shouldCalculateTotalDistanceOfEmptyListsIfLocations() {
-        final List<Integer> emptyLocations = List.of();
+        final List<Integer> emptyLocations = emptyList();
 
         int totalDistance = Locations.totalDistance(emptyLocations, emptyLocations);
 
