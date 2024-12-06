@@ -2,7 +2,10 @@ package dayone;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.sort;
@@ -15,8 +18,8 @@ public class Locations {
     static class Zipper implements Supplier<Pair> {
 
         final List<Integer> x;
-        final List<Integer> y;
 
+        final List<Integer> y;
         Zipper(List<Integer> x, List<Integer> y) {
             this.x = new ArrayList<>(x);
             this.y = new ArrayList<>(y);
@@ -26,8 +29,8 @@ public class Locations {
         public Pair get() {
             return new Pair(x.removeFirst(), y.removeFirst());
         }
-    }
 
+    }
     public static int totalDistance(List<Integer> groupOneLocations, List<Integer> groupTwoLocations) {
         final int toShorterListLength = Math.min(groupTwoLocations.size(), groupOneLocations.size());
 
@@ -42,5 +45,16 @@ public class Locations {
                 .map(pair -> Math.abs(pair.x - pair.y))
                 .mapToInt(Integer::intValue)
                 .sum();
+    }
+
+    public static int similarityScore(List<Integer> left, List<Integer> right) {
+
+        return 0;
+    }
+
+    public static Map<Integer, Integer> cardinalityMultiplierMap(List<Integer> cardinalityList) {
+
+        return cardinalityList.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(entry -> 1)));
     }
 }
