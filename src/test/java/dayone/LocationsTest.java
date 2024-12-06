@@ -14,6 +14,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LocationsTest {
 
     @Test
+    @DisplayName("Should calculate the puzzle input")
+    void shouldCalculateThePuzzleInput() {
+        final DayOneInput dayOneInput = new DayOneInput();
+        final List<Integer> groupOneLocations = dayOneInput.groupOneLocations();
+        final List<Integer> groupTwoLocations = dayOneInput.groupTwoLocations();
+
+        int totalDistance = Locations.totalDistance(groupOneLocations, groupTwoLocations);
+
+        assertThat(totalDistance).isEqualTo(1580061);
+    }
+
+    @Test
     @DisplayName("Should calculate the total distance of example from puzzle description")
     void shouldCalculateTotalDistanceFromExample() {
         final List<Integer> groupOneLocations = List.of(3, 4, 2, 1, 3, 3);
