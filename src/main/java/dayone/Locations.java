@@ -13,13 +13,15 @@ import static java.util.Collections.sort;
 
 public class Locations {
 
+    // --- day 1, first puzzle
+
     record Pair(int x, int y) { }
 
     static class Zipper implements Supplier<Pair> {
 
         final List<Integer> x;
-
         final List<Integer> y;
+
         Zipper(List<Integer> x, List<Integer> y) {
             this.x = new ArrayList<>(x);
             this.y = new ArrayList<>(y);
@@ -47,14 +49,23 @@ public class Locations {
                 .sum();
     }
 
-    public static int similarityScore(List<Integer> left, List<Integer> right) {
+    // --- day 1, second puzzle
 
-        return 0;
+    public static int similarityScore(List<Integer> left, List<Integer> right) {
+        Map<Integer, Integer> cardinalityMap = cardinalityMap(right);
+
+        return left.stream()
+                .map(locationId -> cardinalityMultiplier(locationId, cardinalityMap))
+                .mapToInt(Integer::intValue)
+                .sum();
     }
 
-    public static Map<Integer, Integer> cardinalityMultiplierMap(List<Integer> cardinalityList) {
-
+    static Map<Integer, Integer> cardinalityMap(List<Integer> cardinalityList) {
         return cardinalityList.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(entry -> 1)));
+    }
+
+    static Integer cardinalityMultiplier(Integer n, Map<Integer, Integer> cardinalityMap) {
+        return n * cardinalityMap.getOrDefault(n, 0);
     }
 }

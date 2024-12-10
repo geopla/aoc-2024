@@ -15,14 +15,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LocationsTest {
 
     @Test
-    @DisplayName("Should calculate similarity for cardinality greater than onn in right list")
-    void shouldCalculateSingleSimilarityScoreForCardinalityGreaterThanOneInRightList() {
-        final List<Integer> leftLocations = List.of(3, 42);
-        final List<Integer> rightLocations = List.of(3, 3);
+    @DisplayName("Should calculate similarity score from example")
+    void shouldCalculateSimilarityScoreFromExample() {
+        final List<Integer> groupOneLocations = List.of(3, 4, 2, 1, 3, 3);
+        final List<Integer> groupTwoLocations = List.of(4, 3, 5, 3, 9, 3);
+
+        int similarityScore = Locations.similarityScore(groupOneLocations, groupTwoLocations);
+
+        assertThat(similarityScore).isEqualTo(31);
+    }
+
+    @Test
+    @DisplayName("Should calculate the similarity score of an empty list")
+    void shouldCalculateSimilarityScoreOfEmptyLocationLists() {
+        final List<Integer> emptyLocations = emptyList();
+
+        int similarityScore = Locations.similarityScore(emptyLocations, emptyLocations);
+
+        assertThat(similarityScore).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Should calculate similarity score for cardinality zero in right list")
+    void shouldCalculateSingleSimilarityScoreForCardinalityZeroInRightList() {
+        final List<Integer> leftLocations = List.of(3);
+        final List<Integer> rightLocations = List.of(7);
 
         int similarityScore = Locations.similarityScore(leftLocations, rightLocations);
 
-        assertThat(similarityScore).isEqualTo(6);
+        assertThat(similarityScore).isEqualTo(0);
     }
 
     @Test
@@ -37,43 +58,52 @@ class LocationsTest {
     }
 
     @Test
-    @DisplayName("Should calculate similarity score for cardinality zero in right list")
-    void shouldCalculateSingleSimilarityScoreForCardinalityZeroInRightList() {
-        final List<Integer> leftLocations = List.of(3);
-        final List<Integer> rightLocations = List.of(7);
+    @DisplayName("Should calculate similarity for cardinality greater than one in right list")
+    void shouldCalculateSingleSimilarityScoreForCardinalityGreaterThanOneInRightList() {
+        final List<Integer> leftLocations = List.of(3, 42);
+        final List<Integer> rightLocations = List.of(3, 3);
 
         int similarityScore = Locations.similarityScore(leftLocations, rightLocations);
 
-        assertThat(similarityScore).isEqualTo(0);
+        assertThat(similarityScore).isEqualTo(6);
     }
-
 
     @Test
     @DisplayName("Should create a cardinality multiplier map")
     void shouldCreateMapForCardinalityZero() {
         final List<Integer> cardinalityMultiplierList = List.of(4, 3, 5, 3, 9, 3);
 
-        Map<Integer, Integer> cardinalMultiplierMap = Locations.cardinalityMultiplierMap(cardinalityMultiplierList);
+        Map<Integer, Integer> cardinalMultiplierMap = Locations.cardinalityMap(cardinalityMultiplierList);
 
         assertThat(cardinalMultiplierMap).isNotNull();
     }
 
-    @Test
-    @DisplayName("Should create empty cardinal multiplier map on empty input")
-    void shouldCreateEmptyMapForEmptyLocationsLists() {
-        Map<Integer, Integer> cardinalMultiplierMap = Locations.cardinalityMultiplierMap(emptyList());
+    @ParameterizedTest(name = "locationId: {0} cardinalityMap[{1}:{2}] cardinalityProduct: {3}")
+    @CsvSource({
+            "3, 42, 1,  0",
+            "3, 3,  1,  3",
+            "3, 3,  7, 21"
+    })
+    @DisplayName("Should should compute cardinality product according to cardinality map")
+    void shouldHaveCardinalityMultiplierResultZeroWhenMissing(
+            int locationId,
+            int cardinalityMapKey,
+            int cardinalityMapValue,
+            int expectedCardinalityProduct
+    ) {
+        Map<Integer, Integer> cardinalityMap = Map.of(cardinalityMapKey, cardinalityMapValue);
 
-        assertThat(cardinalMultiplierMap).isEmpty();
+        int cardinalityProduct = Locations.cardinalityMultiplier(locationId, cardinalityMap);
+
+        assertThat(cardinalityProduct).isEqualTo(expectedCardinalityProduct);
     }
 
     @Test
-    @DisplayName("Should calculate the similarity score of an empty list")
-    void shouldCalculateSimilarityScoreOfEmptyLocationLists() {
-        final List<Integer> emptyLocations = emptyList();
+    @DisplayName("Should create empty cardinal map on empty input")
+    void shouldCreateEmptyMapForEmptyLocationsLists() {
+        Map<Integer, Integer> cardinalMultiplierMap = Locations.cardinalityMap(emptyList());
 
-        int similarityScore = Locations.similarityScore(emptyLocations, emptyLocations);
-
-        assertThat(similarityScore).isEqualTo(0);
+        assertThat(cardinalMultiplierMap).isEmpty();
     }
 
     @Test
