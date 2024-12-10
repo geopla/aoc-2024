@@ -15,6 +15,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LocationsTest {
 
     @Test
+    @DisplayName("Should calculate the puzzle input")
+    void shouldCalculateTheSimilarityScorePuzzleInput() {
+        final DayOneInput.LocationIdGroups locationIdGroups = new DayOneInput().locationIdGroups();
+
+        int similarityScore = Locations.similarityScore(locationIdGroups.one(), locationIdGroups.two());
+
+        assertThat(similarityScore).isEqualTo(23_046_913);
+    }
+
+    @Test
     @DisplayName("Should calculate similarity score from example")
     void shouldCalculateSimilarityScoreFromExample() {
         final List<Integer> groupOneLocations = List.of(3, 4, 2, 1, 3, 3);
@@ -108,14 +118,12 @@ class LocationsTest {
 
     @Test
     @DisplayName("Should calculate the puzzle input")
-    void shouldCalculateThePuzzleInput() {
-        final DayOneInput dayOneInput = new DayOneInput();
-        final List<Integer> groupOneLocations = dayOneInput.groupOneLocations();
-        final List<Integer> groupTwoLocations = dayOneInput.groupTwoLocations();
+    void shouldCalculateTheTotalDistancePuzzleInput() {
+        final DayOneInput.LocationIdGroups locationIdGroups = new DayOneInput().locationIdGroups();
 
-        int totalDistance = Locations.totalDistance(groupOneLocations, groupTwoLocations);
+        int totalDistance = Locations.totalDistance(locationIdGroups.one(), locationIdGroups.two());
 
-        assertThat(totalDistance).isEqualTo(1580061);
+        assertThat(totalDistance).isEqualTo(1_580_061);
     }
 
     @Test
