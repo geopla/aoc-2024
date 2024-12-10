@@ -31,8 +31,8 @@ public class Locations {
         public Pair get() {
             return new Pair(x.removeFirst(), y.removeFirst());
         }
-
     }
+
     public static int totalDistance(List<Integer> groupOneLocations, List<Integer> groupTwoLocations) {
         final int toShorterListLength = Math.min(groupTwoLocations.size(), groupOneLocations.size());
 

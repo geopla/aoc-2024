@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LocationsTest {
 
     @Test
-    @DisplayName("Should calculate the puzzle input")
+    @DisplayName("Should calculate the similarity score puzzle input")
     void shouldCalculateTheSimilarityScorePuzzleInput() {
         final DayOneInput.LocationIdGroups locationIdGroups = new DayOneInput().locationIdGroups();
 
