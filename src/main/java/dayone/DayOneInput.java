@@ -1,5 +1,6 @@
 package dayone;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -13,7 +14,6 @@ class DayOneInput {
 
     private final List<Integer> groupOneLocations = new LinkedList<>();
     private final List<Integer> groupTwoLocations = new LinkedList<>();
-    private final InputStream data;
 
     record LocationIdGroups(
             List<Integer> one,
@@ -21,8 +21,11 @@ class DayOneInput {
     ) { }
 
     DayOneInput() {
-        data = getClass().getResourceAsStream("../day-one-input.txt");
-        parse();
+        try (InputStream data = getClass().getResourceAsStream("../day-one-input.txt")) {
+            parse(data);
+        } catch (IOException e) {
+            throw new RuntimeException("failed to read day one input");
+        }
     }
 
     LocationIdGroups locationIdGroups() {
@@ -31,11 +34,7 @@ class DayOneInput {
                 Collections.unmodifiableList(groupTwoLocations));
     }
 
-    InputStream data() {
-        return data;
-    }
-
-    private void parse() {
+    private void parse(InputStream data) {
         try (Scanner scanner = new Scanner(data, StandardCharsets.UTF_8)) {
             var pattern = Pattern.compile("^(?<groupOne>\\d+)\\s+(?<groupTwo>\\d+)\\s*$");
 
@@ -47,7 +46,7 @@ class DayOneInput {
                     groupOneLocations.add(Integer.parseInt(locations.group("groupOne")));
                     groupTwoLocations.add(Integer.parseInt(locations.group("groupTwo")));
                 } else {
-                    throw new IllegalArgumentException("malformed input");
+                    throw new IllegalArgumentException("malformed day one input");
                 }
             }
         }

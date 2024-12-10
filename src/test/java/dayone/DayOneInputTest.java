@@ -8,13 +8,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DayOneInputTest {
 
     @Test
-    @DisplayName("Should have some input")
-    void shouldHaveInput() {
-        final DayOneInput dayOneInput = new DayOneInput();
-        assertThat(dayOneInput.data()).isNotNull();
-    }
-
-    @Test
     @DisplayName("Should read first location for each group")
     void shouldReadFirstLocationForEachGroup() {
         final DayOneInput.LocationIdGroups locationIdGroups = new DayOneInput().locationIdGroups();
