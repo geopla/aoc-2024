@@ -6,3 +6,5 @@ Lessons learned
 - reading JDK API docs doesn't hurt at all
 
 ## Day Two - Red-Nosed Reports
+Lessons learned
+- it's worth to get familiar with `Spliterator` to implement a sliding window
