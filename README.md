@@ -8,3 +8,4 @@ Lessons learned
 ## Day Two - Red-Nosed Reports
 Lessons learned
 - it's worth to get familiar with `Spliterator` to implement a sliding window
+- try to gain an understanding of stream ordering

@@ -13,11 +13,119 @@ import java.util.Spliterator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static daytwo.Report.GrowOrShrinkPredicate.GrowOrShrink.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ReportTest {
+
+    // TODO an up to two level report is always safe
+
+
+    @Test
+    @DisplayName("")
+    void shouldBeSafeOnAllIncreasing() {
+        var report = new Report("1 2 3 4 5");
+
+        boolean isSafe = report.isSafe();
+
+        assertThat(isSafe).isTrue();
+    }
+
+    @Test
+    @DisplayName("")
+    void shouldBeSafeOnAllDecreasing() {
+        var report = new Report("5 4 3 2 1");
+
+        boolean isSafe = report.isSafe();
+
+        assertThat(isSafe).isTrue();
+    }
+
+    @Test
+    @DisplayName("")
+    void shouldBeUnsafeOnViolatingIncreasing() {
+        var report = new Report("2 3 4 5 1");
+
+        boolean isSafe = report.isSafe();
+
+        assertThat(isSafe).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should determine increasing definition on very first level pair")
+    void shouldSetDefinitionOnTestingFirstIncreasingLevelPair() {
+        var growOrShrinkPredicate = new Report.GrowOrShrinkPredicate();
+        assertThat(growOrShrinkPredicate.definition()).isEqualTo(UNDECIDED_YET);
+
+        var increasingLevelPair = new LevelPair(1, 42);
+        growOrShrinkPredicate.test(increasingLevelPair);
+        assertThat(growOrShrinkPredicate.definition()).isEqualTo(INCREASING);
+
+        var decreasingLevelPair = new LevelPair(7, 3);
+        growOrShrinkPredicate.test(decreasingLevelPair);
+        assertThat(growOrShrinkPredicate.definition()).isEqualTo(INCREASING);
+    }
+
+    @Test
+    @DisplayName("Should determine decreasing definition on very first level pair")
+    void shouldSetDefinitionOnTestingFirstDecreasingLevelPair() {
+        var growOrShrinkPredicate = new Report.GrowOrShrinkPredicate();
+        assertThat(growOrShrinkPredicate.definition()).isEqualTo(UNDECIDED_YET);
+
+        var decreasingLevelPair = new LevelPair(7, 3);
+        growOrShrinkPredicate.test(decreasingLevelPair);
+        assertThat(growOrShrinkPredicate.definition()).isEqualTo(DECREASING);
+
+        var increasingLevelPair = new LevelPair(1, 42);
+        growOrShrinkPredicate.test(increasingLevelPair);
+        assertThat(growOrShrinkPredicate.definition()).isEqualTo(DECREASING);
+    }
+
+    @Test
+    @DisplayName("Should accept another increasing level pair")
+    void shouldAcceptAnotherIncreasingLevelPair() {
+        var growOrShrinkPredicate = new Report.GrowOrShrinkPredicate();
+
+        var increasingLevelPair = new LevelPair(7, 42);
+        var increasingLevelPairTest = growOrShrinkPredicate.test(increasingLevelPair);
+        assertThat(increasingLevelPairTest).isTrue();  // always
+
+        var anotherIncreasingLevelPair = new LevelPair(100, 343);
+        var anotherIncreasingLevelPairTest = growOrShrinkPredicate.test(anotherIncreasingLevelPair);
+        assertThat(anotherIncreasingLevelPairTest).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should accept another decreasing level pair")
+    void shouldAcceptAnotherDecreasingLevelPair() {
+        var growOrShrinkPredicate = new Report.GrowOrShrinkPredicate();
+
+        var decreasingLevelPair = new LevelPair(42, 7);
+        var decreasingLevelPairTest = growOrShrinkPredicate.test(decreasingLevelPair);
+        assertThat(decreasingLevelPairTest).isTrue(); // always
+
+        var anotherDecreasingLevelPair = new LevelPair(343, 100);
+        var anotherDecreasingLevelPairTest = growOrShrinkPredicate.test(anotherDecreasingLevelPair);
+        assertThat(anotherDecreasingLevelPairTest).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should fail on growth violation")
+    void shouldFailOnGrowthViolation() {
+        var growOrShrinkPredicate = new Report.GrowOrShrinkPredicate();
+
+        var increasingLevelPair = new LevelPair(7, 42);
+        growOrShrinkPredicate.test(increasingLevelPair);
+
+        var decreasingLevelPair = new LevelPair(42, 9);
+        var decreasingLevelPairTest = growOrShrinkPredicate.test(decreasingLevelPair);
+        assertThat(decreasingLevelPairTest).isFalse();
+    }
+
+    // TODO gap gate
+
 
     @Test
     @DisplayName("Should deliver pairs")
@@ -26,10 +134,10 @@ class ReportTest {
         Stream<LevelPair> levelPairs = report.levelPairs();
 
         assertThat(levelPairs).containsExactly(
-           new LevelPair(1, 2),
-           new LevelPair(2, 3),
-           new LevelPair(3, 4),
-           new LevelPair(4, 5)
+                new LevelPair(1, 2),
+                new LevelPair(2, 3),
+                new LevelPair(3, 4),
+                new LevelPair(4, 5)
         );
     }
 
@@ -54,7 +162,8 @@ class ReportTest {
         assertThatRuntimeException().isThrownBy(() ->
                 new Report("4 e")
                         .levels()
-                        .forEach(level -> { })
+                        .forEach(level -> {
+                        })
         );
     }
 
@@ -66,7 +175,8 @@ class ReportTest {
         IntStream levelStream = IntStream.of();
         Spliterator<LevelPair> spliterator = new Report.LevelPairSpliterator(levelStream.spliterator());
 
-        boolean advance = spliterator.tryAdvance(n -> { });
+        boolean advance = spliterator.tryAdvance(n -> {
+        });
 
         assertThat(advance).isFalse();
     }
@@ -77,7 +187,8 @@ class ReportTest {
         IntStream levelStream = IntStream.of(42);
         Spliterator<LevelPair> spliterator = new Report.LevelPairSpliterator(levelStream.spliterator());
 
-        boolean advance = spliterator.tryAdvance(n -> { });
+        boolean advance = spliterator.tryAdvance(n -> {
+        });
 
         assertThat(advance).isFalse();
     }
@@ -88,10 +199,12 @@ class ReportTest {
         IntStream levelStream = IntStream.of(42, 7);
         Spliterator<LevelPair> spliterator = new Report.LevelPairSpliterator(levelStream.spliterator());
 
-        boolean firstAdvance = spliterator.tryAdvance(n -> { });
+        boolean firstAdvance = spliterator.tryAdvance(n -> {
+        });
         assertThat(firstAdvance).isTrue();
 
-        boolean secondAdvance = spliterator.tryAdvance(n -> { });
+        boolean secondAdvance = spliterator.tryAdvance(n -> {
+        });
         assertThat(secondAdvance).isFalse();
     }
 
@@ -101,13 +214,16 @@ class ReportTest {
         IntStream levelStream = IntStream.of(42, 7, 5);
         Spliterator<LevelPair> spliterator = new Report.LevelPairSpliterator(levelStream.spliterator());
 
-        boolean firstAdvance = spliterator.tryAdvance(n -> { });
+        boolean firstAdvance = spliterator.tryAdvance(n -> {
+        });
         assertThat(firstAdvance).isTrue();
 
-        boolean secondAdvance = spliterator.tryAdvance(n -> { });
+        boolean secondAdvance = spliterator.tryAdvance(n -> {
+        });
         assertThat(secondAdvance).isTrue();
 
-        boolean thirdAdvance = spliterator.tryAdvance(n -> { });
+        boolean thirdAdvance = spliterator.tryAdvance(n -> {
+        });
         assertThat(thirdAdvance).isFalse();
     }
 }
