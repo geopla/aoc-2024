@@ -7,5 +7,8 @@ Lessons learned
 
 ## Day Two - Red-Nosed Reports
 Lessons learned
-- it's worth to get familiar with `Spliterator` to implement a sliding window
+- found three variants to implement a sliding window of size n on a Java stream
+  - with `Spliterator` (the actual implementation with fixed window size 2 being the most efficient one)
+  - with a custom collector (usage like the spliterator solution)
+  - with a deque (nice implementation but usage not that intuitive)
 - try to gain an understanding of stream ordering

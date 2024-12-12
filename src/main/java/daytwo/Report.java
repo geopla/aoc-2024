@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class Report {
-
     private final String levels;
 
     record LevelPair(Integer first, Integer second) {
@@ -20,10 +19,10 @@ public class Report {
     }
 
     static class LevelPairSpliterator implements Spliterator<LevelPair> {
-
         private final Spliterator.OfInt sourceElementsSpliterator;
         private int current;
         private boolean hasNext;
+
         LevelPairSpliterator(Spliterator.OfInt sourceElementsSpliterator) {
             this.sourceElementsSpliterator = sourceElementsSpliterator;
             this.hasNext = sourceElementsSpliterator.tryAdvance((int value) -> current = value);
@@ -60,7 +59,6 @@ public class Report {
     }
 
     static class GrowOrShrinkPredicate implements Predicate<LevelPair> {
-
         enum GrowOrShrink {
             INCREASING,
             DECREASING,
@@ -99,7 +97,9 @@ public class Report {
     }
 
     public boolean isSafe() {
-        return true;
+        final GrowOrShrinkPredicate growOrShrinkPredicate = new GrowOrShrinkPredicate();
+
+        return levelPairs().allMatch(growOrShrinkPredicate);
     }
 
     public Report(String levels) {

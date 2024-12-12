@@ -20,11 +20,9 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ReportTest {
 
-    // TODO an up to two level report is always safe
-
 
     @Test
-    @DisplayName("")
+    @DisplayName("Should be safe on all increasing")
     void shouldBeSafeOnAllIncreasing() {
         var report = new Report("1 2 3 4 5");
 
@@ -34,7 +32,7 @@ class ReportTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Should be safe on all decreasing")
     void shouldBeSafeOnAllDecreasing() {
         var report = new Report("5 4 3 2 1");
 
@@ -44,8 +42,8 @@ class ReportTest {
     }
 
     @Test
-    @DisplayName("")
-    void shouldBeUnsafeOnViolatingIncreasing() {
+    @DisplayName("Should be unsafe on increasing violation")
+    void shouldBeUnsafeOnIncreasingViolation() {
         var report = new Report("2 3 4 5 1");
 
         boolean isSafe = report.isSafe();
@@ -54,7 +52,17 @@ class ReportTest {
     }
 
     @Test
-    @DisplayName("Should determine increasing definition on very first level pair")
+    @DisplayName("Should be unsafe on decreasing violation")
+    void shouldBeUnsafeOnDecreasingViolation() {
+        var report = new Report("4 3 2 1 5");
+
+        boolean isSafe = report.isSafe();
+
+        assertThat(isSafe).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should determine increasing definition on very first level pair only")
     void shouldSetDefinitionOnTestingFirstIncreasingLevelPair() {
         var growOrShrinkPredicate = new Report.GrowOrShrinkPredicate();
         assertThat(growOrShrinkPredicate.definition()).isEqualTo(UNDECIDED_YET);
@@ -63,13 +71,13 @@ class ReportTest {
         growOrShrinkPredicate.test(increasingLevelPair);
         assertThat(growOrShrinkPredicate.definition()).isEqualTo(INCREASING);
 
-        var decreasingLevelPair = new LevelPair(7, 3);
+        var decreasingLevelPair = new LevelPair(42, 3);
         growOrShrinkPredicate.test(decreasingLevelPair);
         assertThat(growOrShrinkPredicate.definition()).isEqualTo(INCREASING);
     }
 
     @Test
-    @DisplayName("Should determine decreasing definition on very first level pair")
+    @DisplayName("Should determine decreasing definition on very first level pair only")
     void shouldSetDefinitionOnTestingFirstDecreasingLevelPair() {
         var growOrShrinkPredicate = new Report.GrowOrShrinkPredicate();
         assertThat(growOrShrinkPredicate.definition()).isEqualTo(UNDECIDED_YET);
@@ -78,7 +86,7 @@ class ReportTest {
         growOrShrinkPredicate.test(decreasingLevelPair);
         assertThat(growOrShrinkPredicate.definition()).isEqualTo(DECREASING);
 
-        var increasingLevelPair = new LevelPair(1, 42);
+        var increasingLevelPair = new LevelPair(3, 42);
         growOrShrinkPredicate.test(increasingLevelPair);
         assertThat(growOrShrinkPredicate.definition()).isEqualTo(DECREASING);
     }
@@ -90,9 +98,9 @@ class ReportTest {
 
         var increasingLevelPair = new LevelPair(7, 42);
         var increasingLevelPairTest = growOrShrinkPredicate.test(increasingLevelPair);
-        assertThat(increasingLevelPairTest).isTrue();  // always
+        assertThat(increasingLevelPairTest).isTrue();  // first one is always true
 
-        var anotherIncreasingLevelPair = new LevelPair(100, 343);
+        var anotherIncreasingLevelPair = new LevelPair(42, 100);
         var anotherIncreasingLevelPairTest = growOrShrinkPredicate.test(anotherIncreasingLevelPair);
         assertThat(anotherIncreasingLevelPairTest).isTrue();
     }
@@ -104,9 +112,9 @@ class ReportTest {
 
         var decreasingLevelPair = new LevelPair(42, 7);
         var decreasingLevelPairTest = growOrShrinkPredicate.test(decreasingLevelPair);
-        assertThat(decreasingLevelPairTest).isTrue(); // always
+        assertThat(decreasingLevelPairTest).isTrue(); // first one is always true
 
-        var anotherDecreasingLevelPair = new LevelPair(343, 100);
+        var anotherDecreasingLevelPair = new LevelPair(7, 3);
         var anotherDecreasingLevelPairTest = growOrShrinkPredicate.test(anotherDecreasingLevelPair);
         assertThat(anotherDecreasingLevelPairTest).isTrue();
     }
@@ -122,6 +130,19 @@ class ReportTest {
         var decreasingLevelPair = new LevelPair(42, 9);
         var decreasingLevelPairTest = growOrShrinkPredicate.test(decreasingLevelPair);
         assertThat(decreasingLevelPairTest).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should fail on shrink violation")
+    void shouldFailOnShrinkViolation() {
+        var growOrShrinkPredicate = new Report.GrowOrShrinkPredicate();
+
+        var decreasingLevelPair = new LevelPair(42, 7);
+        growOrShrinkPredicate.test(decreasingLevelPair);
+
+        var increasingLevelPair = new LevelPair(7, 9);
+        var increasingLevelPairTest = growOrShrinkPredicate.test(increasingLevelPair);
+        assertThat(increasingLevelPairTest).isFalse();
     }
 
     // TODO gap gate
