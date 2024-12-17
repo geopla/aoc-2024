@@ -58,48 +58,15 @@ public class Report {
         }
     }
 
-    static class GrowOrShrinkPredicate implements Predicate<LevelPair> {
-        enum GrowOrShrink {
-            INCREASING,
-            DECREASING,
-            UNDECIDED_YET;
-        }
-
-        private GrowOrShrink definition = GrowOrShrink.UNDECIDED_YET;
-
-        @Override
-        public boolean test(LevelPair levelPair) {
-            if (levelPair.hasEqualValues()) {
-                throw new IllegalArgumentException("levels need to be strictly increasing or decreasing, violation: %s".formatted(levelPair));
-            }
-
-            if (definition == GrowOrShrink.UNDECIDED_YET) {
-                definition = (levelPair.first < levelPair.second()) ? GrowOrShrink.INCREASING : GrowOrShrink.DECREASING;
-                return true;
-            }
-            else {
-                return stillStrictlyGrowingOrShrinking(levelPair);
-            }
-        }
-
-        private boolean stillStrictlyGrowingOrShrinking(LevelPair levelPair) {
-            return switch (definition) {
-                case INCREASING -> levelPair.first < levelPair.second();
-                case DECREASING -> levelPair.first > levelPair.second();
-                case UNDECIDED_YET -> throw new IllegalStateException("Ooopsie growth shrink still undecided");
-                default -> throw new IllegalStateException("Oopsie growth shrink in undefined state");
-            };
-        }
-
-        GrowOrShrink definition() {
-            return definition;
-        }
-    }
 
     public boolean isSafe() {
-        final GrowOrShrinkPredicate growOrShrinkPredicate = new GrowOrShrinkPredicate();
+        final Predicate<LevelPair> growthPredicate = LevelGrowthPredicates.createFrom(levelPairs());
 
-        return levelPairs().allMatch(growOrShrinkPredicate);
+        final var minDistance = 1;
+        final var maxDistance = 3;
+        final Predicate<LevelPair> distancePredicate = new LevelDistancePredicate(minDistance, maxDistance);
+
+        return levelPairs().allMatch(growthPredicate.and(distancePredicate));
     }
 
     public Report(String levels) {
