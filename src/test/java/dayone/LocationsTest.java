@@ -79,7 +79,7 @@ class LocationsTest {
     }
 
     @Test
-    @DisplayName("Should create a cardinality multiplier map")
+    @DisplayName("Should createFrom a cardinality multiplier map")
     void shouldCreateMapForCardinalityZero() {
         final List<Integer> cardinalityMultiplierList = List.of(4, 3, 5, 3, 9, 3);
 
@@ -109,7 +109,7 @@ class LocationsTest {
     }
 
     @Test
-    @DisplayName("Should create empty cardinal map on empty input")
+    @DisplayName("Should createFrom empty cardinal map on empty input")
     void shouldCreateEmptyMapForEmptyLocationsLists() {
         Map<Integer, Integer> cardinalMultiplierMap = Locations.cardinalityMap(emptyList());
 

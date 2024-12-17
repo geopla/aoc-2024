@@ -61,6 +61,8 @@ class ReportTest {
         assertThat(isSafe).isFalse();
     }
 
+    // -- will become obsolete after redesign
+    //
     @Test
     @DisplayName("Should determine increasing definition on very first level pair only")
     void shouldSetDefinitionOnTestingFirstIncreasingLevelPair() {
@@ -144,6 +146,8 @@ class ReportTest {
         var increasingLevelPairTest = growOrShrinkPredicate.test(increasingLevelPair);
         assertThat(increasingLevelPairTest).isFalse();
     }
+    //
+    // -- obsolete after redesign
 
     // TODO gap gate
 
