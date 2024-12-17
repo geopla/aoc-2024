@@ -10,6 +10,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ReportStatisticsTest {
 
     @Test
+    @DisplayName("Should count safe reports from puzzle example file")
+    void shouldCountSafeReportsFromPuzzleExampleFile() {
+        long safeReportCount = ReportStatistics.safeReportCountFrom("../day-two-input-sample.txt");
+
+        assertThat(safeReportCount).isEqualTo(2);
+    }
+
+    @Test
     @DisplayName("Should count safe reports from puzzle example")
     void shouldCountSafeReportsFromPuzzleExample() {
         final List<String> unusualData = List.of(
