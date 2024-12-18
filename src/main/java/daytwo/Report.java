@@ -2,6 +2,7 @@ package daytwo;
 
 import java.util.Spliterator;
 import java.util.StringTokenizer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -9,20 +10,23 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class Report {
+
     private final String levels;
+    private final Predicate<LevelPair> safetyPredicate;
 
     record LevelPair(Integer first, Integer second) {
 
         boolean hasEqualValues() {
             return first.equals(second);
         }
+
     }
 
     static class LevelPairSpliterator implements Spliterator<LevelPair> {
+
         private final Spliterator.OfInt sourceElementsSpliterator;
         private int current;
         private boolean hasNext;
-
         LevelPairSpliterator(Spliterator.OfInt sourceElementsSpliterator) {
             this.sourceElementsSpliterator = sourceElementsSpliterator;
             this.hasNext = sourceElementsSpliterator.tryAdvance((int value) -> current = value);
@@ -56,34 +60,57 @@ public class Report {
         public int characteristics() {
             return sourceElementsSpliterator.characteristics() & ~Spliterator.SIZED;
         }
+
     }
 
+    public Report(String levels) {
+        this.levels = levels;
 
-    public boolean isSafe() {
-        final Predicate<LevelPair> growthPredicate = LevelGrowthPredicates.createFrom(levelPairs());
+        Predicate<LevelPair> growthPredicate = LevelGrowthPredicates.createFrom(levelPairsFrom(levels()));
 
         final var minDistance = 1;
         final var maxDistance = 3;
         final Predicate<LevelPair> distancePredicate = new LevelDistancePredicate(minDistance, maxDistance);
 
-        return levelPairs().allMatch(growthPredicate.and(distancePredicate));
+        safetyPredicate = growthPredicate.and(distancePredicate);
     }
 
-    public Report(String levels) {
-        this.levels = levels;
+    public boolean isSafeWithProblemDampener() {
+        final int violationPosition = firstFirstViolationPosition();
+
+        if (violationPosition == -1) {
+            return true;
+        }
+        else {
+            var levelsHavingFirstBadLevelSkipped = IntStream.concat(
+                    levels().limit(violationPosition),
+                    levels().skip(violationPosition + 1)
+            );
+            return levelPairsFrom(levelsHavingFirstBadLevelSkipped).allMatch(safetyPredicate);
+        }
     }
 
-    Stream<LevelPair> levelPairs() {
-        IntStream levelStream = levels();
-        Spliterator<LevelPair> spliterator = new LevelPairSpliterator(levelStream.spliterator());
+    int firstFirstViolationPosition() {
+        var violationPosition = new AtomicInteger(0);
+
+        return levelPairsFrom(levels())
+                .peek(levelPair -> violationPosition.incrementAndGet())
+                .filter(levelPair -> !safetyPredicate.test(levelPair))
+                .findFirst()
+                .map(unused -> violationPosition.get() - 1)
+                .orElse(-1);
+    }
+
+    public boolean isSafe() {
+        return levelPairsFrom(levels()).allMatch(safetyPredicate);
+    }
+
+    Stream<LevelPair> levelPairsFrom(IntStream levels) {
+        Spliterator<LevelPair> spliterator = new LevelPairSpliterator(levels.spliterator());
         return StreamSupport.stream(spliterator, false);
     }
 
     IntStream levels() {
-        return parseLevels();
-    }
-
-    private IntStream parseLevels() {
         var levelsIterator = new StringTokenizer(levels).asIterator();
 
         return  Stream.generate(() -> null)

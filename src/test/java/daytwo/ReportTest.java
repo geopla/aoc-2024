@@ -1,6 +1,7 @@
 package daytwo;
 
 import daytwo.Report.LevelPair;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,6 +21,39 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ReportTest {
 
+    @ParameterizedTest(name = "levels: {0} safe: {1}")
+    @CsvSource({
+            "'7 6 4 2 1', true",
+            "'1 2 7 8 9', false",
+            "'9 7 6 2 1', false",
+            "'1 3 2 4 5', true",
+            "'8 6 4 4 1', true",
+            "'1 3 6 7 9', true"
+    })
+    @DisplayName("Should verify examples from puzzle with problem dampener")
+    void shouldVerifyExamplesFromPuzzleWithProblemDampener(String levels, boolean safe) {
+        var report = new Report(levels);
+
+        assertThat(report.isSafeWithProblemDampener()).isEqualTo(safe);
+    }
+
+    @Disabled
+    @ParameterizedTest(name = "levels: {0} violation position: {1}")
+    @CsvSource({
+            "'7 6 4 2 1', -1",
+            "'1 2 7 8 9',  1",
+            "'9 7 6 2 1',  2",
+            "'1 3 2 4 5',  1",
+            "'8 6 4 4 1',  2",
+            "'1 3 6 7 9', -1",
+            "'1 1 3 5 6',  0"
+    })
+    @DisplayName("Should find violation position when present")
+    void shouldFindViolationPosition(String levels, int violationPosition) {
+        var report = new Report(levels);
+
+        assertThat(report.firstFirstViolationPosition()).isEqualTo(violationPosition);
+    }
 
     @ParameterizedTest(name = "levels: {0} safe: {1}")
     @CsvSource({
@@ -101,7 +135,7 @@ class ReportTest {
     @DisplayName("Should deliver pairs")
     void shouldDeliverPairs() {
         var report = new Report("1 2 3 4 5");
-        Stream<LevelPair> levelPairs = report.levelPairs();
+        Stream<LevelPair> levelPairs = report.levelPairsFrom(report.levels());
 
         assertThat(levelPairs).containsExactly(
                 new LevelPair(1, 2),
