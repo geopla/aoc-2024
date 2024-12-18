@@ -12,3 +12,4 @@ Lessons learned
   - with a custom collector (usage like the spliterator solution)
   - with a deque (nice implementation but usage not that intuitive)
 - try to gain an understanding of stream ordering
+- state is the enemy of coding in functional style
