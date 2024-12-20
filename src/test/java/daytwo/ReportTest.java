@@ -1,7 +1,6 @@
 package daytwo;
 
 import daytwo.Report.LevelPair;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,12 +10,13 @@ import org.junit.jupiter.params.provider.FieldSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.Spliterator;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatRuntimeException;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ReportTest {
@@ -35,24 +35,6 @@ class ReportTest {
         var report = new Report(levels);
 
         assertThat(report.isSafeWithProblemDampener()).isEqualTo(safe);
-    }
-
-    @Disabled
-    @ParameterizedTest(name = "levels: {0} violation position: {1}")
-    @CsvSource({
-            "'7 6 4 2 1', -1",
-            "'1 2 7 8 9',  1",
-            "'9 7 6 2 1',  2",
-            "'1 3 2 4 5',  1",
-            "'8 6 4 4 1',  2",
-            "'1 3 6 7 9', -1",
-            "'1 1 3 5 6',  0"
-    })
-    @DisplayName("Should find violation position when present")
-    void shouldFindViolationPosition(String levels, int violationPosition) {
-        var report = new Report(levels);
-
-        assertThat(report.firstFirstViolationPosition()).isEqualTo(violationPosition);
     }
 
     @ParameterizedTest(name = "levels: {0} safe: {1}")
@@ -135,7 +117,7 @@ class ReportTest {
     @DisplayName("Should deliver pairs")
     void shouldDeliverPairs() {
         var report = new Report("1 2 3 4 5");
-        Stream<LevelPair> levelPairs = report.levelPairsFrom(report.levels());
+        Stream<LevelPair> levelPairs = report.levelPairs();
 
         assertThat(levelPairs).containsExactly(
                 new LevelPair(1, 2),
@@ -229,5 +211,42 @@ class ReportTest {
         boolean thirdAdvance = spliterator.tryAdvance(n -> {
         });
         assertThat(thirdAdvance).isFalse();
+    }
+
+    // --- skipping n-th element stuff
+
+    @Test
+    @DisplayName("Should return stream of levels with skipped n-th element")
+    void shouldReturnStreamOfLevelsWhithSkippedNthElement() {
+        Stream<IntStream> dampenerLevels = new Report("1 2 3").dampenerLevels();
+
+        var actualSkippedNthLevels = dampenerLevels
+                .map(intStream -> intStream.boxed().toList())
+                .collect(Collectors.toSet());
+
+        var expectedSkippedNthLevels = Set.of(
+                List.of(2, 3),
+                List.of(1, 3),
+                List.of(1, 2)
+        );
+        assertThat(actualSkippedNthLevels).isEqualTo(expectedSkippedNthLevels);
+    }
+
+    // --- bug stuff
+
+    @Test
+    @DisplayName("Should handle dampener case where first pair indicates decrease but is safe in growing")
+    void shouldHandleDampenerCaseWhenFirstPairIndicatesDecrease() {
+        var allLevels = "57 56 57 59 60 63 64 65";
+        boolean allLevelsSafe = new Report(allLevels).isSafe();
+        boolean allLevelsSafeWithProblemDampener = new Report(allLevels).isSafeWithProblemDampener();
+
+        var dampenedLevels = "56 57 59 60 63 64 65";
+        boolean dampenedLevelsSafe = new Report(dampenedLevels).isSafe();
+
+        assertThat(allLevelsSafe).isFalse();
+        assertThat(allLevelsSafeWithProblemDampener).isTrue();
+
+        assertThat(dampenedLevelsSafe).isTrue();
     }
 }

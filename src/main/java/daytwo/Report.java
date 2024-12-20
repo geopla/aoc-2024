@@ -2,7 +2,6 @@ package daytwo;
 
 import java.util.Spliterator;
 import java.util.StringTokenizer;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -12,7 +11,7 @@ import java.util.stream.StreamSupport;
 public class Report {
 
     private final String levels;
-    private final Predicate<LevelPair> safetyPredicate;
+    private Predicate<LevelPair> safetyPredicate;
 
     record LevelPair(Integer first, Integer second) {
 
@@ -27,6 +26,7 @@ public class Report {
         private final Spliterator.OfInt sourceElementsSpliterator;
         private int current;
         private boolean hasNext;
+
         LevelPairSpliterator(Spliterator.OfInt sourceElementsSpliterator) {
             this.sourceElementsSpliterator = sourceElementsSpliterator;
             this.hasNext = sourceElementsSpliterator.tryAdvance((int value) -> current = value);
@@ -65,65 +65,90 @@ public class Report {
 
     public Report(String levels) {
         this.levels = levels;
+    }
 
-        Predicate<LevelPair> growthPredicate = LevelGrowthPredicates.createFrom(levelPairsFrom(levels()));
+    private void initializeSafetyPredicate(LevelPair levelGrowthMarker) {
+        var growthPredicate = LevelGrowthPredicates.createFrom(levelGrowthMarker);
+        var distancePredicate = createLevelDistancePredicate();
 
+        safetyPredicate =  growthPredicate.and(distancePredicate);
+    }
+
+
+    private static Predicate<LevelPair> createLevelDistancePredicate() {
         final var minDistance = 1;
         final var maxDistance = 3;
-        final Predicate<LevelPair> distancePredicate = new LevelDistancePredicate(minDistance, maxDistance);
-
-        safetyPredicate = growthPredicate.and(distancePredicate);
+        return new LevelDistancePredicate(minDistance, maxDistance);
     }
-
+    
     public boolean isSafeWithProblemDampener() {
-        final int violationPosition = firstFirstViolationPosition();
-
-        if (violationPosition == -1) {
+        if (isSafe()) {
             return true;
-        }
-        else {
-            var levelsHavingFirstBadLevelSkipped = IntStream.concat(
-                    levels().limit(violationPosition),
-                    levels().skip(violationPosition + 1)
-            );
-            return levelPairsFrom(levelsHavingFirstBadLevelSkipped).allMatch(safetyPredicate);
+        } else {
+            return isSafeWhenRemovingOneElement();
         }
     }
 
-    int firstFirstViolationPosition() {
-        var violationPosition = new AtomicInteger(0);
-
-        return levelPairsFrom(levels())
-                .peek(levelPair -> violationPosition.incrementAndGet())
-                .filter(levelPair -> !safetyPredicate.test(levelPair))
+    private boolean isSafeWhenRemovingOneElement() {
+        return dampenerLevels(levels())
+                .map(this::levelPairs)
+                .map(this::isSafe)
+                .filter(safe -> safe)
                 .findFirst()
-                .map(unused -> violationPosition.get() - 1)
-                .orElse(-1);
+                .orElse(false);
     }
 
     public boolean isSafe() {
-        return levelPairsFrom(levels()).allMatch(safetyPredicate);
+        return isSafe(levelPairs());
     }
 
-    Stream<LevelPair> levelPairsFrom(IntStream levels) {
-        Spliterator<LevelPair> spliterator = new LevelPairSpliterator(levels.spliterator());
-        return StreamSupport.stream(spliterator, false);
+    boolean isSafe(Stream<LevelPair> levelPairs) {
+        var levelPairMarkerSpliterator = new MarkerSpliterator<>(
+                levelPairs.spliterator(),
+                levelPair -> ! levelPair.hasEqualValues()
+        );
+
+        levelPairMarkerSpliterator.marker().ifPresent(this::initializeSafetyPredicate);
+
+        return StreamSupport.stream(levelPairMarkerSpliterator, false).allMatch(safetyPredicate);
     }
 
     IntStream levels() {
         var levelsIterator = new StringTokenizer(levels).asIterator();
 
-        return  Stream.generate(() -> null)
+        return Stream.generate(() -> null)
                 .takeWhile(thinghy -> levelsIterator.hasNext())
                 .map(obj -> levelsIterator.next())
                 .mapToInt(Report::tryParseInteger);
     }
 
+    Stream<LevelPair> levelPairs() {
+        return levelPairs(levels());
+    }
+
+    Stream<LevelPair> levelPairs(IntStream levels) {
+        Spliterator<LevelPair> spliterator = new LevelPairSpliterator(levels.spliterator());
+        return StreamSupport.stream(spliterator, false);
+    }
+
+    Stream<IntStream> dampenerLevels() {
+        return dampenerLevels(levels());
+    }
+
+    Stream<IntStream> dampenerLevels(IntStream levels) {
+        int[] allLevels = levels.toArray();
+
+        return IntStream.range(0, allLevels.length)
+                .mapToObj(n -> IntStream.concat(
+                        IntStream.of(allLevels).limit(n),
+                        IntStream.of(allLevels).skip(n + 1)
+                ));
+    }
+
     private static int tryParseInteger(Object value) {
         try {
             return Integer.parseInt((String) value);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new RuntimeException(e);
         }
     }

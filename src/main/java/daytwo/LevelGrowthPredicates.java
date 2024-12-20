@@ -1,7 +1,6 @@
 package daytwo;
 
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static daytwo.Report.LevelPair;
 
@@ -23,16 +22,7 @@ class LevelGrowthPredicates {
         }
     }
 
-    public static Predicate<LevelPair> createFrom(Stream<LevelPair> levelPairStream) {
-        return levelPairStream
-                .dropWhile(LevelPair::hasEqualValues)
-                .findFirst()
-                .map(LevelGrowthPredicates::createFrom)
-                .orElse(empty -> false);
-
-    }
-
-    private static Predicate<LevelPair> createFrom(LevelPair levelPair) {
+    public static Predicate<LevelPair> createFrom(LevelPair levelPair) {
         if (levelPair.first() < levelPair.second()) {
             return new GraduallyIncreasing();
         }

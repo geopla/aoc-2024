@@ -18,6 +18,14 @@ class ReportStatisticsTest {
     }
 
     @Test
+    @DisplayName("Should count safe reports with problem dampener from puzzle file")
+    void shouldCountSafeReportsWithProblemDampenerFromPuzzleFile() {
+        long safeReportCount = ReportStatistics.safeReportCountWithProblemDampenerFrom("../day-two-input.txt");
+
+        assertThat(safeReportCount).isEqualTo(311);
+    }
+
+    @Test
     @DisplayName("Should count safe reports from puzzle example file")
     void shouldCountSafeReportsFromPuzzleExampleFile() {
         long safeReportCount = ReportStatistics.safeReportCountFrom("../day-two-input-sample.txt");

@@ -13,3 +13,5 @@ Lessons learned
   - with a deque (nice implementation but usage not that intuitive)
 - try to gain an understanding of stream ordering
 - state is the enemy of coding in functional style
+- brute force is always an option
+- streams can be reused with some effort
