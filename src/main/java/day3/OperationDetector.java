@@ -46,6 +46,10 @@ class OperationDetector implements Consumer<Character> {
         return new Multiplier(currentTokens.get(1), currentTokens.get(2));
     }
 
+    boolean foundOperation() {
+        return currentTokens.size() == 3;
+    }
+
     @Override
     public void accept(Character character) {
         currentInput.add(character);
