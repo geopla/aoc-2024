@@ -136,6 +136,37 @@ class OperationDetectorTest {
                 .isFalse();
     }
 
+    @Test
+    @DisplayName("Should be resettable to read another operation")
+    void shouldBeResettable() {
+        // mul(2,4)mul(3,5)
+
+        operationDetector.accept('m');
+        operationDetector.accept('u');
+        operationDetector.accept('l');
+        operationDetector.accept('(');
+        operationDetector.accept('2');
+        operationDetector.accept(',');
+        operationDetector.accept('4');
+        operationDetector.accept(')');
+
+        assertThat(operationDetector.currentOperation()).isEqualTo(new Multiplier("2", "4"));
+
+        operationDetector.reset();
+        assertThat(operationDetector.foundOperation()).isFalse();
+
+        operationDetector.accept('m');
+        operationDetector.accept('u');
+        operationDetector.accept('l');
+        operationDetector.accept('(');
+        operationDetector.accept('3');
+        operationDetector.accept(',');
+        operationDetector.accept('5');
+        operationDetector.accept(')');
+
+        assertThat(operationDetector.currentOperation()).isEqualTo(new Multiplier("3", "5"));
+    }
+
     static Spliterator<Character> from(String input) {
         return input.codePoints()
                 .mapToObj(c -> (char) c)

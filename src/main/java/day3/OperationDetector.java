@@ -61,6 +61,10 @@ class OperationDetector implements Consumer<Character> {
         return new Multiplier(currentTokens.get(1), currentTokens.get(2));
     }
 
+    void reset() {
+        switchBackToStart();
+    }
+
     List<String> currentTokens() {
         // method not required but implemented 'cause n-ary operators of any name will be detected
         return Collections.unmodifiableList(currentTokens);

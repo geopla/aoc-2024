@@ -19,10 +19,11 @@ public class OperationSpliterator implements Spliterator<Multiplier> {
         while (sourceSpliterator.tryAdvance(operationDetector)) {
             if (operationDetector.foundOperation()) {
                 action.accept(operationDetector.currentOperation());
+                operationDetector.reset();
+
                 return true;
             }
         }
-
         return false;
     }
 
