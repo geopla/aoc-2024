@@ -1,5 +1,6 @@
 package day3;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +16,8 @@ class OperationDetector implements Consumer<Character> {
         OP_NAME,
         OP_NAME_TERMINATOR,
         ARGUMENT,
-        ARGUMENT_TERMINATOR
+        ARGUMENT_TERMINATOR,
+        OP_TERMINATOR
     }
 
     private static final Set<Character> firstLetterOfOperators = Set.of('m');
@@ -24,6 +26,7 @@ class OperationDetector implements Consumer<Character> {
     private static final Set<Character> allowedLettersOfArgument = Set.of('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
     private static final Set<Character> terminatingLettersOfArgument = Set.of(',');
     private static final Set<Character> terminatingLettersOfOperation = Set.of(')');
+    private static final Set<String> allowedOperationNames = Set.of("mul");
 
     private final LinkedList<Character> currentInput;
     private final List<String> currentTokens;
@@ -35,99 +38,115 @@ class OperationDetector implements Consumer<Character> {
         currentTokens = new LinkedList<>();
     }
 
-    Multiplier current() {
-        if (currentTokens.isEmpty() || ! "mul".equals(currentTokens.getFirst())) {
-            throw new IllegalStateException("missing or wrong operator token");
-        }
-        if (currentTokens.size() != 3) {
-            throw new IllegalStateException("failed to detect exactly two operation arguments");
-        }
-
-        return new Multiplier(currentTokens.get(1), currentTokens.get(2));
-    }
-
-    boolean foundOperation() {
-        return currentTokens.size() == 3;
-    }
-
     @Override
     public void accept(Character character) {
         currentInput.add(character);
 
         switch (currentState) {
-            case START -> switchFromStartForInput();
-            case OP_NAME -> switchFromOpNameForInput();
-            case OP_NAME_TERMINATOR -> switchFromOpNameTerminatorForInput();
-            case ARGUMENT -> switchFromArgumentForInput();
-            case ARGUMENT_TERMINATOR -> switchFromArgumentTerminatorForInput();
+            case START -> switchFromStart();
+            case OP_NAME -> switchFromOpName();
+            case OP_NAME_TERMINATOR -> switchFromOpNameTerminator();
+            case ARGUMENT -> switchFromArgument();
+            case ARGUMENT_TERMINATOR -> switchFromArgumentTerminator();
+            case OP_TERMINATOR -> switchFromOpTerminator();
         }
     }
 
-    private void switchFromStartForInput() {
-        // delete the tokens to the latest possible time to ease debugging
-        clearArgumentTokens();
+    Multiplier currentOperation() {
+        validateCurrentTokens();
 
+        return new Multiplier(currentTokens.get(1), currentTokens.get(2));
+    }
+
+    List<String> currentTokens() {
+        // method not required but implemented 'cause n-ary operators of any name will be detected
+        return Collections.unmodifiableList(currentTokens);
+    }
+
+    boolean foundOperation() {
+        // detector has actually no restriction on operation name and argument size so we need to apply
+        // some constraints here
+
+        return hasOperationName()
+                && isAllowedOperation()
+                && hasExactlyTwoArguments()
+                && hasAllowedArgumentSize(currentTokens.get(1))
+                && hasAllowedArgumentSize(currentTokens.get(2));
+    }
+
+    private void switchFromStart() {
         if (isFirstLetterOfOperator(currentInput.getLast())) {
             currentState = OP_NAME;
-        }
-        else {
+        } else {
             currentState = START;
         }
     }
 
-    private void switchFromOpNameForInput() {
+    private void switchFromOpName() {
         if (isLetterOfOperator(currentInput.getLast())) {
             currentState = OP_NAME;
-        }
-        else if (isOperationNameTerminator(currentInput.getLast())) {
+        } else if (isOperationNameTerminator(currentInput.getLast())) {
             currentState = OP_NAME_TERMINATOR;
             storeOperatorToken();
             clearCurrentInput();
-        }
-        else {
+        } else {
             currentState = START;
             clearCurrentInput();
         }
     }
 
-    private void switchFromOpNameTerminatorForInput() {
+    private void switchFromOpNameTerminator() {
         if (isLetterOfArgument(currentInput.getLast())) {
             currentState = ARGUMENT;
-        }
-        else {
+        } else if (isFirstLetterOfOperator(currentInput.getLast())) {
+            currentState = OP_NAME;
+            resetCurrentInputTo(currentInput.getLast());
+            clearArgumentTokens();
+        } else {
             currentState = START;
             clearCurrentInput();
+            clearArgumentTokens();
         }
     }
 
-    private void switchFromArgumentForInput() {
+    private void switchFromArgument() {
         if (isLetterOfArgument(currentInput.getLast())) {
             currentState = ARGUMENT;
-        }
-        else if (isArgumentTerminator(currentInput.getLast())) {
+        } else if (isArgumentTerminator(currentInput.getLast())) {
             currentState = ARGUMENT_TERMINATOR;
             storeArgumentToken();
             clearCurrentInput();
-        }
-        else if (isOperationTerminator(currentInput.getLast())) {
-            currentState = START;
+        } else if (isOperationTerminator(currentInput.getLast())) {
+            currentState = OP_TERMINATOR;
             storeArgumentToken();
             clearCurrentInput();
-        }
-        else {
+        } else if (isFirstLetterOfOperator(currentInput.getLast())) {
+            currentState = OP_NAME;
+            resetCurrentInputTo(currentInput.getLast());
+            clearArgumentTokens();
+        } else {
             currentState = START;
             clearCurrentInput();
+            clearArgumentTokens();
         }
     }
 
-    private void switchFromArgumentTerminatorForInput() {
+    private void switchFromArgumentTerminator() {
         if (isLetterOfArgument(currentInput.getLast())) {
             currentState = ARGUMENT;
-        }
-        else {
+        } else if (isFirstLetterOfOperator(currentInput.getLast())) {
+            currentState = OP_NAME;
+            resetCurrentInputTo(currentInput.getLast());
+            clearArgumentTokens();
+        } else {
             currentState = START;
             clearCurrentInput();
+            clearArgumentTokens();
         }
+    }
+
+    private void switchFromOpTerminator() {
+        System.out.println("End state ignores %c".formatted(currentInput.getLast()));
     }
 
     private void storeOperatorToken() {
@@ -154,6 +173,11 @@ class OperationDetector implements Consumer<Character> {
 
     private void clearCurrentInput() {
         currentInput.clear();
+    }
+
+    private void resetCurrentInputTo(Character last) {
+        currentInput.clear();
+        currentInput.add(last);
     }
 
     private void clearArgumentTokens() {
@@ -184,7 +208,38 @@ class OperationDetector implements Consumer<Character> {
         return terminatingLettersOfOperation.contains(character);
     }
 
-    State currentState() {
-        return currentState;
+    private boolean hasOperationName() {
+        return !currentTokens.isEmpty();
     }
+
+    private void validateCurrentTokens() {
+        if (!hasOperationName()) {
+            throw new IllegalStateException("missing operator name (token)");
+        }
+        if (!isAllowedOperation()) {
+            throw new IllegalStateException("operator name not supported");
+        }
+        if (!hasExactlyTwoArguments()) {
+            throw new IllegalStateException("only binary operators are supported");
+        }
+        if (!hasAllowedArgumentSize(currentTokens.get(1))) {
+            throw new IllegalStateException("only 1 to 3 digits are allowed for first argument");
+        }
+        if (!hasAllowedArgumentSize(currentTokens.get(2))) {
+            throw new IllegalStateException("only 1 to 3 digits are allowed for second argument");
+        }
+    }
+
+    private boolean isAllowedOperation() {
+        return allowedOperationNames.contains(currentTokens.getFirst());
+    }
+
+    private boolean hasExactlyTwoArguments() {
+        return currentTokens.size() == 3;
+    }
+
+    private boolean hasAllowedArgumentSize(String argument) {
+        return !argument.isEmpty() && argument.length() <= 3;
+    }
+
 }

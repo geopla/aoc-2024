@@ -18,7 +18,7 @@ public class OperationSpliterator implements Spliterator<Multiplier> {
 
         while (sourceSpliterator.tryAdvance(operationDetector)) {
             if (operationDetector.foundOperation()) {
-                action.accept(operationDetector.current());
+                action.accept(operationDetector.currentOperation());
                 return true;
             }
         }
