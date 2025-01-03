@@ -43,6 +43,22 @@ class OperationSpliteratorTest {
         );
     }
 
+    @Test
+    @DisplayName("Should detect operations from corrupted memory example")
+    void shouldDetectOperationFromCorruptedMemoryExample() {
+        Spliterator<Character> inputSpliterator = from("xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))");
+
+        var operationSpliterator = new OperationSpliterator(inputSpliterator, operationDetector);
+        Stream<Multiplier> operationStream = StreamSupport.stream(operationSpliterator, false);
+
+        assertThat(operationStream).containsExactly(
+                new Multiplier("2", "4"),
+                new Multiplier("5", "5"),
+                new Multiplier("11", "8"),
+                new Multiplier("8", "5")
+        );
+    }
+
     static Spliterator<Character> from(String input) {
         return input.codePoints()
                 .mapToObj(c -> (char) c)
