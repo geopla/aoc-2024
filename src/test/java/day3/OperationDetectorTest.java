@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class OperationDetectorTest {
@@ -76,10 +77,7 @@ class OperationDetectorTest {
     })
     @DisplayName("Should do nothing on corrupted input")
     void shouldDoNothingOnCorruptedInput(String input) {
-        Spliterator<Character> inputSpliterator = from(input);
-
-        while (inputSpliterator.tryAdvance(operationDetector)) {
-        }
+        parseWhole(input);
 
         assertThat(operationDetector.foundOperation())
                 .as("found operation")
@@ -90,10 +88,7 @@ class OperationDetectorTest {
     @MethodSource("syntacticallyCorrenctNAryOperations")
     @DisplayName("Should detect syntactical correct n-ary operation (though not allowed)")
     void shouldDetectSyntacticalCorrectNArayOperation(String input, List<String> expectedTokens) {
-        Spliterator<Character> inputSpliterator = from(input);
-
-        while (inputSpliterator.tryAdvance(operationDetector)) {
-        }
+        parseWhole(input);
 
         assertThat(operationDetector.currentTokens()).containsExactlyElementsOf(expectedTokens);
     }
@@ -117,9 +112,7 @@ class OperationDetectorTest {
     })
     @DisplayName("Should throw illegal state exception when current syntactically legal tokens violate allowed operations")
     void shouldThrowExceptionOnIllegalState(String input, String expectedMessage) {
-        Spliterator<Character> inputSpliterator = from(input);
-
-        while (inputSpliterator.tryAdvance(operationDetector)) { }
+        parseWhole(input);
 
         assertThatIllegalStateException()
                 .isThrownBy(() -> operationDetector.currentOperation())
@@ -136,9 +129,7 @@ class OperationDetectorTest {
     })
     @DisplayName("Should reject syntactically correct but not allowed operations")
     void shouldRejectSyntacticallyCorrectButNotAllowedOperations(String input) {
-        Spliterator<Character> inputSpliterator = from(input);
-
-        while (inputSpliterator.tryAdvance(operationDetector)) { }
+        parseWhole(input);
 
         assertThat(operationDetector.foundOperation())
                 .as("found operation")
@@ -155,8 +146,8 @@ class OperationDetectorTest {
         Spliterator<Character> inputSpliterator = from(input);
 
         while (inputSpliterator.tryAdvance(operationDetector)) {
-            // just eat up the whole input - won't happen in real life but makes the test easy
-            // otherwise just use consecutive invocations of the consumer method accept()
+            // just eat up the whole input - won't happen in real life but makes the test easier to implement
+            // otherwise you need to use consecutive invocations of the consumer method accept()
         }
     }
 }
