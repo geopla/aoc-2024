@@ -11,6 +11,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CorruptedMemoryMultiplierTest {
 
+
+    @Test
+    @DisplayName("shouldAddMultipliersFromChallenge")
+    void shouldAddMultipliersFromChallenge() {
+        var multipliersSum = multipliersSumFrom("../day-3-input.txt");
+
+        assertThat(multipliersSum).isEqualTo(23552108);
+    }
+
     @Test
     @DisplayName("shouldAddMultipliersFromSampleFile")
     void shouldAddMultipliersFromSampleFile() {

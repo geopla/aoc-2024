@@ -39,7 +39,7 @@ public class CorruptedMemoryMultiplier {
     static Stream<Character> toCharacterStream(InputStream inputStream) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        return StreamSupport.stream(new Spliterator<Character>() {
+        return StreamSupport.stream(new Spliterator<>() {
 
             @Override
             public boolean tryAdvance(Consumer<? super Character> action) {
