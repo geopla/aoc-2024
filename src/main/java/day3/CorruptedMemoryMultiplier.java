@@ -24,12 +24,12 @@ public class CorruptedMemoryMultiplier {
     static int multipliersSumFrom(Stream<Character> memory) {
 
         return multipliersFrom(memory)
-                .map(Multiplier::apply)
+                .map(Operation::apply)
                 .mapToInt(Integer::intValue)
                 .sum();
     }
 
-    static Stream<Multiplier> multipliersFrom(Stream<Character> memory) {
+    static Stream<Operation> multipliersFrom(Stream<Character> memory) {
         var operationDetector = new OperationDetector();
         var operationSpliterator = new OperationSpliterator(memory.spliterator(), operationDetector);
 

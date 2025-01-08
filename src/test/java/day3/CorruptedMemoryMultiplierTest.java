@@ -3,14 +3,15 @@ package day3;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static day3.CorruptedMemoryMultiplier.multipliersFrom;
-import static day3.CorruptedMemoryMultiplier.multipliersSumFrom;
+import static day3.CorruptedMemoryMultiplier.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CorruptedMemoryMultiplierTest {
-
 
     @Test
     @DisplayName("shouldAddMultipliersFromChallenge")
@@ -45,13 +46,13 @@ class CorruptedMemoryMultiplierTest {
         final Stream<Character> corruptedMemory =
                 from("xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))");
 
-        Stream<Multiplier> multipliers = multipliersFrom(corruptedMemory);
+        Stream<Operation> multipliers = multipliersFrom(corruptedMemory);
 
         assertThat(multipliers).containsExactly(
-                new Multiplier("2", "4"),
-                new Multiplier("5", "5"),
-                new Multiplier("11", "8"),
-                new Multiplier("8", "5")
+                new Operation.Multiplier(List.of("2", "4")),
+                new Operation.Multiplier(List.of("5", "5")),
+                new Operation.Multiplier(List.of("11", "8")),
+                new Operation.Multiplier(List.of("8", "5"))
         );
     }
 

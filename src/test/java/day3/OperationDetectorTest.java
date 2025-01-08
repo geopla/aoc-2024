@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.Stream;
 
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -41,7 +42,7 @@ class OperationDetectorTest {
         assertThat(operationDetector.foundOperation())
                 .as("found operation")
                 .isTrue();
-        assertThat(operationDetector.currentOperation()).isEqualTo(new Multiplier("2", "4"));
+        assertThat(operationDetector.operation()).isEqualTo(new Operation.Multiplier(of("2", "4")));
     }
 
     @ParameterizedTest
@@ -54,7 +55,7 @@ class OperationDetectorTest {
     void shouldRestartProperlyAfterDetectingAnOperationNameStartAgain(String input) {
         parseWhole(input);
 
-        assertThat(operationDetector.currentOperation()).isEqualTo(new Multiplier("42", "100"));
+        assertThat(operationDetector.operation()).isEqualTo(new Operation.Multiplier(of("42", "100")));
     }
 
     @Test
@@ -65,7 +66,7 @@ class OperationDetectorTest {
         assertThat(operationDetector.foundOperation())
                 .as("found operation")
                 .isTrue();
-        assertThat(operationDetector.currentOperation()).isEqualTo(new Multiplier("2", "4"));
+        assertThat(operationDetector.operation()).isEqualTo(new Operation.Multiplier(of("2", "4")));
     }
 
     @ParameterizedTest
@@ -95,10 +96,10 @@ class OperationDetectorTest {
 
     static Stream<Arguments> syntacticallyCorrenctNAryOperations() {
         return Stream.of(
-                arguments("mul(7)", List.of("mul", "7")),
-                arguments("mul(2003,5)", List.of("mul", "2003", "5")),
-                arguments("mul(2,50,420)", List.of("mul", "2", "50", "420")),
-                arguments("mulmul(2,4)", List.of("mulmul", "2", "4"))
+                arguments("mul(7)", of("mul", "7")),
+                arguments("mul(2003,5)", of("mul", "2003", "5")),
+                arguments("mul(2,50,420)", of("mul", "2", "50", "420")),
+                arguments("mulmul(2,4)", of("mulmul", "2", "4"))
         );
     }
 
@@ -106,35 +107,20 @@ class OperationDetectorTest {
     @CsvSource({
             "'?(2,4)', 'missing operator name (token)'",
             "'mulmul(2,4)', 'operator name not supported'",
-            "'mul(2,50,420)', 'only binary operators are supported'",
-            "'mul(2003,5)', 'only 1 to 3 digits are allowed for first argument'",
-            "'mul(5,2003)', 'only 1 to 3 digits are allowed for second argument'"
+            "'mul(5,2003)', 'only 1 to 3 digits are allowed for any argument'"
     })
     @DisplayName("Should throw illegal state exception when current syntactically legal tokens violate allowed operations")
     void shouldThrowExceptionOnIllegalState(String input, String expectedMessage) {
         parseWhole(input);
 
+        assertThat(operationDetector.foundOperation()).isFalse();
+
         assertThatIllegalStateException()
-                .isThrownBy(() -> operationDetector.currentOperation())
+                .isThrownBy(() -> operationDetector.operation())
                 .withMessage(expectedMessage);
     }
 
-    @ParameterizedTest
-    @CsvSource({
-            "'mulmul(2,4)'",
-            "'mul(2,50,420)'",
-            "'mul(2003,5)'",
-            "'mul(5,2003)'",
-            "'mul(7)'"
-    })
-    @DisplayName("Should reject syntactically correct but not allowed operations")
-    void shouldRejectSyntacticallyCorrectButNotAllowedOperations(String input) {
-        parseWhole(input);
 
-        assertThat(operationDetector.foundOperation())
-                .as("found operation")
-                .isFalse();
-    }
 
     @Test
     @DisplayName("Should be resettable to read another operation")
@@ -150,7 +136,7 @@ class OperationDetectorTest {
         operationDetector.accept('4');
         operationDetector.accept(')');
 
-        assertThat(operationDetector.currentOperation()).isEqualTo(new Multiplier("2", "4"));
+        assertThat(operationDetector.operation()).isEqualTo(new Multiplier("2", "4"));
 
         operationDetector.reset();
         assertThat(operationDetector.foundOperation()).isFalse();
@@ -164,7 +150,7 @@ class OperationDetectorTest {
         operationDetector.accept('5');
         operationDetector.accept(')');
 
-        assertThat(operationDetector.currentOperation()).isEqualTo(new Multiplier("3", "5"));
+        assertThat(operationDetector.operation()).isEqualTo(new Multiplier("3", "5"));
     }
 
     static Spliterator<Character> from(String input) {

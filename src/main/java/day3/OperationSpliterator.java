@@ -3,7 +3,7 @@ package day3;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-public class OperationSpliterator implements Spliterator<Multiplier> {
+public class OperationSpliterator implements Spliterator<Operation> {
 
     private final Spliterator<Character> sourceSpliterator;
     private final OperationDetector operationDetector;
@@ -14,11 +14,15 @@ public class OperationSpliterator implements Spliterator<Multiplier> {
     }
 
     @Override
-    public boolean tryAdvance(Consumer<? super Multiplier> action) {
+    public boolean tryAdvance(Consumer<? super Operation> action) {
 
         while (sourceSpliterator.tryAdvance(operationDetector)) {
+
+
+            // TODO foundOperation() will terminate the stream because it returns false on n-ary operations
+
             if (operationDetector.foundOperation()) {
-                action.accept(operationDetector.currentOperation());
+                action.accept(operationDetector.operation());
                 operationDetector.reset();
 
                 return true;
@@ -28,7 +32,7 @@ public class OperationSpliterator implements Spliterator<Multiplier> {
     }
 
     @Override
-    public Spliterator<Multiplier> trySplit() {
+    public Spliterator<Operation> trySplit() {
         return null;
     }
 

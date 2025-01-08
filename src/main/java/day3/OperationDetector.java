@@ -56,9 +56,16 @@ class OperationDetector implements Consumer<Character> {
         }
     }
 
-    Multiplier currentOperation() {
-        validateCurrentTokens();
-        return new Multiplier(currentTokens.get(1), currentTokens.get(2));
+    boolean foundOperation() {
+        return false;
+    }
+
+    Operation operation() {
+        return new Operation.Multiplier(operands());
+    }
+
+    List<String> operands() {
+        return List.copyOf(currentTokens.subList(1, currentTokens.size()));
     }
 
     void reset() {
@@ -70,15 +77,20 @@ class OperationDetector implements Consumer<Character> {
         return Collections.unmodifiableList(currentTokens);
     }
 
-    boolean foundOperation() {
-        // detector has actually no restriction on operation name and argument size so we need to apply
-        // some constraints here
+    private boolean isValidOperation() {
+        return hasOperationName();
+    }
 
-        return hasOperationName()
-                && isAllowedOperation()
-                && hasArgumentCount(2)
-                && hasAllowedArgumentSize(currentTokens.get(1))
-                && hasAllowedArgumentSize(currentTokens.get(2));
+    private boolean hasOperationName() {
+        return !currentTokens.isEmpty();
+    }
+
+    private String operationName() {
+        return currentTokens().getFirst();
+    }
+
+    private boolean isAllowed(String operationName) {
+        return ALLOWED_OPERATION_NAMES.contains(operationName);
     }
 
     private void switchFromStart() {
@@ -134,7 +146,7 @@ class OperationDetector implements Consumer<Character> {
     }
 
     private void switchFromOperationTerminator() {
-        // System.out.println("End state ignores %c".formatted(currentInput.getLast()));
+        System.out.println("End state ignores %c".formatted(currentInput.getLast()));
     }
 
     private void switchToOperationTerminator() {
@@ -234,36 +246,9 @@ class OperationDetector implements Consumer<Character> {
         return TERMINATING_LETTERS_OF_OPERATION.contains(character);
     }
 
-    private boolean hasOperationName() {
-        return !currentTokens.isEmpty();
-    }
 
-    private void validateCurrentTokens() {
-        if (!hasOperationName()) {
-            throw new IllegalStateException("missing operator name (token)");
-        }
-        if (!isAllowedOperation()) {
-            throw new IllegalStateException("operator name not supported");
-        }
 
-        // actually only binary operations are allowed; the following code
-        // needs refactoring when that constraint is lifted
-        final var numberOfArgumentsAllowed = 2;
 
-        if (!hasArgumentCount(numberOfArgumentsAllowed)) {
-            throw new IllegalStateException("only binary operators are supported");
-        }
-        if (!hasAllowedArgumentSize(currentTokens.get(1))) {
-            throw new IllegalStateException("only 1 to 3 digits are allowed for first argument");
-        }
-        if (!hasAllowedArgumentSize(currentTokens.get(2))) {
-            throw new IllegalStateException("only 1 to 3 digits are allowed for second argument");
-        }
-    }
-
-    private boolean isAllowedOperation() {
-        return ALLOWED_OPERATION_NAMES.contains(currentTokens.getFirst());
-    }
 
     private boolean hasArgumentCount(int numberOfArguments) {
         final var operationName = 1;
