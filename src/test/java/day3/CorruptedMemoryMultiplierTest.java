@@ -3,12 +3,11 @@ package day3;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static day3.CorruptedMemoryMultiplier.*;
+import static day3.CorruptedMemoryMultiplier.multipliersFrom;
+import static day3.CorruptedMemoryMultiplier.multipliersSumFrom;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CorruptedMemoryMultiplierTest {
@@ -18,7 +17,7 @@ class CorruptedMemoryMultiplierTest {
     void shouldAddMultipliersFromChallenge() {
         var multipliersSum = multipliersSumFrom("../day-3-input.txt");
 
-        assertThat(multipliersSum).isEqualTo(23552108);
+        assertThat(multipliersSum).isEqualTo(169021493);
     }
 
     @Test

@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class OperationDetectorTest {
@@ -29,7 +28,7 @@ class OperationDetectorTest {
     @Test
     @DisplayName("Should be in starting state when created")
     void shouldBeInStartStatingStateWhenCreated() {
-        assertThat(operationDetector.foundOperation())
+        assertThat(operationDetector.foundOperationTokens())
                 .as("found operation")
                 .isFalse();
     }
@@ -39,10 +38,18 @@ class OperationDetectorTest {
     void shouldDetectSingleValidMultiplier() {
         parseWhole("mul(2,4)");
 
-        assertThat(operationDetector.foundOperation())
+        assertThat(operationDetector.foundOperationTokens())
                 .as("found operation")
                 .isTrue();
-        assertThat(operationDetector.operation()).isEqualTo(new Operation.Multiplier(of("2", "4")));
+        assertThat(operationDetector.currentTokens()).containsExactly("mul", "2", "4");
+    }
+
+    @Test
+    @DisplayName("Should NOT find operation tokens when operation terminator is missing")
+    void shouldNotFindOperationTokensWhenOperationTerminatorIsMissing() {
+        parseWhole("mul(2,4");
+
+        assertThat(operationDetector.foundOperationTokens()).isFalse();
     }
 
     @ParameterizedTest
@@ -55,7 +62,7 @@ class OperationDetectorTest {
     void shouldRestartProperlyAfterDetectingAnOperationNameStartAgain(String input) {
         parseWhole(input);
 
-        assertThat(operationDetector.operation()).isEqualTo(new Operation.Multiplier(of("42", "100")));
+        assertThat(operationDetector.currentTokens()).containsExactly("mul", "42", "100");
     }
 
     @Test
@@ -63,10 +70,10 @@ class OperationDetectorTest {
     void shouldDetectFirstValidMultiplierOnly() {
         parseWhole("xmul(mul(2,4)mul(17,42)");
 
-        assertThat(operationDetector.foundOperation())
+        assertThat(operationDetector.foundOperationTokens())
                 .as("found operation")
                 .isTrue();
-        assertThat(operationDetector.operation()).isEqualTo(new Operation.Multiplier(of("2", "4")));
+        assertThat(operationDetector.currentTokens()).containsExactly("mul", "2", "4");
     }
 
     @ParameterizedTest
@@ -80,7 +87,7 @@ class OperationDetectorTest {
     void shouldDoNothingOnCorruptedInput(String input) {
         parseWhole(input);
 
-        assertThat(operationDetector.foundOperation())
+        assertThat(operationDetector.foundOperationTokens())
                 .as("found operation")
                 .isFalse();
     }
@@ -103,25 +110,6 @@ class OperationDetectorTest {
         );
     }
 
-    @ParameterizedTest
-    @CsvSource({
-            "'?(2,4)', 'missing operator name (token)'",
-            "'mulmul(2,4)', 'operator name not supported'",
-            "'mul(5,2003)', 'only 1 to 3 digits are allowed for any argument'"
-    })
-    @DisplayName("Should throw illegal state exception when current syntactically legal tokens violate allowed operations")
-    void shouldThrowExceptionOnIllegalState(String input, String expectedMessage) {
-        parseWhole(input);
-
-        assertThat(operationDetector.foundOperation()).isFalse();
-
-        assertThatIllegalStateException()
-                .isThrownBy(() -> operationDetector.operation())
-                .withMessage(expectedMessage);
-    }
-
-
-
     @Test
     @DisplayName("Should be resettable to read another operation")
     void shouldBeResettable() {
@@ -136,10 +124,10 @@ class OperationDetectorTest {
         operationDetector.accept('4');
         operationDetector.accept(')');
 
-        assertThat(operationDetector.operation()).isEqualTo(new Multiplier("2", "4"));
+        assertThat(operationDetector.currentTokens()).containsExactly("mul", "2", "4");
 
         operationDetector.reset();
-        assertThat(operationDetector.foundOperation()).isFalse();
+        assertThat(operationDetector.foundOperationTokens()).isFalse();
 
         operationDetector.accept('m');
         operationDetector.accept('u');
@@ -150,7 +138,7 @@ class OperationDetectorTest {
         operationDetector.accept('5');
         operationDetector.accept(')');
 
-        assertThat(operationDetector.operation()).isEqualTo(new Multiplier("3", "5"));
+        assertThat(operationDetector.currentTokens()).containsExactly("mul", "3", "5");
     }
 
     static Spliterator<Character> from(String input) {

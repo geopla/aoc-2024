@@ -1,5 +1,6 @@
 package day3;
 
+import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
@@ -18,11 +19,13 @@ public class OperationSpliterator implements Spliterator<Operation> {
 
         while (sourceSpliterator.tryAdvance(operationDetector)) {
 
+            if (operationDetector.foundOperationTokens()) {
+                List<String> tokens = operationDetector.currentTokens();
 
-            // TODO foundOperation() will terminate the stream because it returns false on n-ary operations
-
-            if (operationDetector.foundOperation()) {
-                action.accept(operationDetector.operation());
+                if (OperationFactory.isRelevantOperation(tokens)) {
+                    Operation operation = OperationFactory.create(tokens);
+                    action.accept(operation);
+                }
                 operationDetector.reset();
 
                 return true;

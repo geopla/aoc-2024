@@ -18,11 +18,7 @@ class OperationDetector implements Consumer<Character> {
         ARGUMENT,
         ARGUMENT_TERMINATOR,
         OP_TERMINATOR
-
     }
-
-    private static final Set<String> ALLOWED_OPERATION_NAMES = Set.of("mul");
-    private static final int MAX_NUMBER_OF_ARGUMENT_DIGITS = 3;
 
     private static final Set<Character> FIRST_LETTER_OF_OPERATORS = Set.of('m');
     private static final Set<Character> ALLOWED_LETTERS_OF_OPERATORS = Set.of('l', 'm', 'u');
@@ -30,7 +26,6 @@ class OperationDetector implements Consumer<Character> {
     private static final Set<Character> ALLOWED_LETTERS_OF_ARGUMENT = Set.of('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
     private static final Set<Character> TERMINATING_LETTERS_OF_ARGUMENT = Set.of(',');
     private static final Set<Character> TERMINATING_LETTERS_OF_OPERATION = Set.of(')');
-
 
     private final LinkedList<Character> currentInput;
     private final List<String> currentTokens;
@@ -56,41 +51,21 @@ class OperationDetector implements Consumer<Character> {
         }
     }
 
-    boolean foundOperation() {
-        return false;
+    boolean foundOperationTokens() {
+        var tokenSizeOfUnaryOperation = 2;
+        return currentTokens.size() >= tokenSizeOfUnaryOperation && currentState == OP_TERMINATOR;
     }
 
-    Operation operation() {
-        return new Operation.Multiplier(operands());
-    }
-
-    List<String> operands() {
-        return List.copyOf(currentTokens.subList(1, currentTokens.size()));
+    List<String> currentTokens() {
+        return Collections.unmodifiableList(currentTokens);
     }
 
     void reset() {
         switchBackToStart();
     }
 
-    List<String> currentTokens() {
-        // method not required but implemented 'cause n-ary operators of any name will be detected
-        return Collections.unmodifiableList(currentTokens);
-    }
-
-    private boolean isValidOperation() {
-        return hasOperationName();
-    }
-
     private boolean hasOperationName() {
         return !currentTokens.isEmpty();
-    }
-
-    private String operationName() {
-        return currentTokens().getFirst();
-    }
-
-    private boolean isAllowed(String operationName) {
-        return ALLOWED_OPERATION_NAMES.contains(operationName);
     }
 
     private void switchFromStart() {
@@ -146,7 +121,7 @@ class OperationDetector implements Consumer<Character> {
     }
 
     private void switchFromOperationTerminator() {
-        System.out.println("End state ignores %c".formatted(currentInput.getLast()));
+        // System.out.println("End state ignores %c".formatted(currentInput.getLast()));
     }
 
     private void switchToOperationTerminator() {
@@ -202,11 +177,11 @@ class OperationDetector implements Consumer<Character> {
         // get rid of the argument terminating symbol ',' or the whole operation termination symbol ')'
         currentInput.removeLast();
 
-        String operatorToken = currentInput.stream()
+        String argumentToken = currentInput.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining());
 
-        currentTokens.add(operatorToken);
+        currentTokens.add(argumentToken);
     }
 
     private void clearCurrentInput() {
@@ -244,19 +219,5 @@ class OperationDetector implements Consumer<Character> {
 
     private static boolean isOperationTerminator(Character character) {
         return TERMINATING_LETTERS_OF_OPERATION.contains(character);
-    }
-
-
-
-
-
-    private boolean hasArgumentCount(int numberOfArguments) {
-        final var operationName = 1;
-
-        return currentTokens.size() == operationName + numberOfArguments;
-    }
-
-    private boolean hasAllowedArgumentSize(String argument) {
-        return !argument.isEmpty() && argument.length() <= MAX_NUMBER_OF_ARGUMENT_DIGITS;
     }
 }

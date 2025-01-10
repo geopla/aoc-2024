@@ -5,10 +5,7 @@ import daytwo.Report.LevelPair;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
-import static daytwo.LevelGrowthPredicates.*;
+import static daytwo.LevelGrowthPredicates.GraduallyDecreasing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
