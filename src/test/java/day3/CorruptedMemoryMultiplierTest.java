@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static day3.CorruptedMemoryMultiplier.multipliersFrom;
-import static day3.CorruptedMemoryMultiplier.multipliersSumFrom;
+import static day3.CorruptedMemoryMultiplier.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CorruptedMemoryMultiplierTest {
@@ -18,6 +17,14 @@ class CorruptedMemoryMultiplierTest {
         var multipliersSum = multipliersSumFrom("../day-3-input.txt");
 
         assertThat(multipliersSum).isEqualTo(169021493);
+    }
+
+    @Test
+    @DisplayName("shouldAddMultipliersWithConditionalsFromChallenge")
+    void shouldAddMultipliersWithConditionalsFromChallenge() {
+        var multipliersSum = multipliersWithConditionalsSumFrom("../day-3-input.txt");
+
+        assertThat(multipliersSum).isEqualTo(111762583);
     }
 
     @Test
@@ -51,6 +58,20 @@ class CorruptedMemoryMultiplierTest {
                 new Operation.Multiplier(List.of("2", "4")),
                 new Operation.Multiplier(List.of("5", "5")),
                 new Operation.Multiplier(List.of("11", "8")),
+                new Operation.Multiplier(List.of("8", "5"))
+        );
+    }
+
+    @Test
+    @DisplayName("Should read valid multipliers with conditionals from corrupted memory example")
+    void shouldReadValidMultipliersWithConditionalsFromCorruptedMemoryExample() {
+        final Stream<Character> corruptedMemory =
+                from("xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))");
+
+        Stream<Operation> multipliers = multipliersWithConditionalsFrom(corruptedMemory);
+
+        assertThat(multipliers).containsExactly(
+                new Operation.Multiplier(List.of("2", "4")),
                 new Operation.Multiplier(List.of("8", "5"))
         );
     }

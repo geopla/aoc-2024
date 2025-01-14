@@ -35,6 +35,30 @@ public class CorruptedMemoryMultiplier {
         return StreamSupport.stream(operationSpliterator, false);
     }
 
+    static int multipliersWithConditionalsSumFrom(String resourceNamme) {
+
+        try (InputStream resourceAsStream = CorruptedMemoryMultiplier.class.getResourceAsStream(resourceNamme)) {
+            return multipliersWithConditionalsSumFrom(toCharacterStream(resourceAsStream));
+        } catch (IOException e) {
+            throw new RuntimeException("failed to read resource %s".formatted(resourceNamme), e);
+        }
+    }
+
+    static int multipliersWithConditionalsSumFrom(Stream<Character> memory) {
+
+        return multipliersWithConditionalsFrom(memory)
+                .map(Operation::apply)
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
+    static Stream<Operation> multipliersWithConditionalsFrom(Stream<Character> memory) {
+        var operationDetector = new OperationDetector();
+        var operationSpliterator = new OperationActivatorSpliterator(memory.spliterator(), operationDetector);
+
+        return StreamSupport.stream(operationSpliterator, false);
+    }
+
     static Stream<Character> toCharacterStream(InputStream inputStream) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 

@@ -20,16 +20,35 @@ class OperationDetector implements Consumer<Character> {
         OP_TERMINATOR
     }
 
-    private static final Set<Character> FIRST_LETTER_OF_OPERATORS = Set.of('m');
-    private static final Set<Character> ALLOWED_LETTERS_OF_OPERATORS = Set.of('l', 'm', 'u');
-    private static final Set<Character> TERMINATING_LETTERS_OF_OPERATION_NAME = Set.of('(');
-    private static final Set<Character> ALLOWED_LETTERS_OF_ARGUMENT = Set.of('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
-    private static final Set<Character> TERMINATING_LETTERS_OF_ARGUMENT = Set.of(',');
-    private static final Set<Character> TERMINATING_LETTERS_OF_OPERATION = Set.of(')');
+    static final Set<Character> FIRST_LETTER_OF_OPERATORS;
+    static final Set<Character> ALLOWED_LETTERS_OF_OPERATORS;
+    static final Set<Character> TERMINATING_LETTERS_OF_OPERATION_NAME = Set.of('(');
+    static final Set<Character> ALLOWED_LETTERS_OF_ARGUMENT = Set.of('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+    static final Set<Character> TERMINATING_LETTERS_OF_ARGUMENT = Set.of(',');
+    static final Set<Character> TERMINATING_LETTERS_OF_OPERATION = Set.of(')');
+
+    static {
+        var names = List.of("mul", "do", "don't");
+
+        ALLOWED_LETTERS_OF_OPERATORS = allowedLettersFromOperators(names);
+        FIRST_LETTER_OF_OPERATORS = firstLettersFromOperators(names);
+    }
 
     private final LinkedList<Character> currentInput;
     private final List<String> currentTokens;
     private State currentState;
+
+    static Set<Character> allowedLettersFromOperators(List<String> names) {
+        return names.stream()
+                .flatMap(word -> word.codePoints().mapToObj(c -> (char) c))
+                .collect(Collectors.toSet());
+    }
+
+    static Set<Character> firstLettersFromOperators(List<String> names) {
+        return names.stream()
+                .map(word -> (char) word.codePoints().findFirst().getAsInt())
+                .collect(Collectors.toSet());
+    }
 
     OperationDetector() {
         currentState = State.START;
@@ -52,8 +71,7 @@ class OperationDetector implements Consumer<Character> {
     }
 
     boolean foundOperationTokens() {
-        var tokenSizeOfUnaryOperation = 2;
-        return currentTokens.size() >= tokenSizeOfUnaryOperation && currentState == OP_TERMINATOR;
+        return currentTokens.size() >= 0 && currentState == OP_TERMINATOR;
     }
 
     List<String> currentTokens() {
@@ -89,6 +107,8 @@ class OperationDetector implements Consumer<Character> {
     private void switchFromOperationNameTerminator() {
         if (isLetterOfArgument(currentInput.getLast())) {
             switchToArgument();
+        } else if (isOperationTerminator(currentInput.getLast())) {
+            switchToOperationTerminator();
         } else if (isFirstLetterOfOperator(currentInput.getLast())) {
             switchBackToOpName();
         } else {

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
@@ -18,118 +17,77 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class OperationFactoryTest {
 
     @Test
-    @DisplayName("Should create multipliers")
+    @DisplayName("Should create multiplier 'mul'")
     void shouldCreateMultiplier() {
         Operation multiplier = OperationFactory.create(of("mul", "4", "2"));
         assertThat(multiplier).isEqualTo(new Operation.Multiplier(List.of("4", "2")));
     }
 
-    @ParameterizedTest
-    @MethodSource("relevantOperation")
-    @DisplayName("Should verify relevant operations")
-    void shouldVerifyRelevantOperation(List<String> tokens, boolean expectedRelevant) {
-        assertThat(OperationFactory.isRelevantOperation(tokens)).isEqualTo(expectedRelevant);
+    @Test
+    @DisplayName("Should create activator 'do'")
+    void shouldCreateActivator() {
+        Operation multiplier = OperationFactory.create(of("do"));
+        assertThat(multiplier).isInstanceOf(Operation.Do.class);
     }
 
-    static Stream<Arguments> relevantOperation() {
+    @Test
+    @DisplayName("Should create deactivator 'dont'")
+    void shouldCreateDeactivator() {
+        Operation multiplier = OperationFactory.create(of("don't"));
+        assertThat(multiplier).isInstanceOf(Operation.Dont.class);
+    }
+
+    @ParameterizedTest
+    @MethodSource("detectComputationalOperation")
+    @DisplayName("Should detect computational operations")
+    void shouldDetectComputationalOperations(Operation operation, boolean expectedConditional) {
+        assertThat(OperationFactory.isComputing(operation)).isEqualTo(expectedConditional);
+    }
+
+    static Stream<Arguments> detectComputationalOperation() {
         return Stream.of(
-                arguments(List.of("mul", "1"), false),
-                arguments(List.of("mul", "2", "1"), true),
-                arguments(List.of("mul", "3", "4", "5"), false),
-                arguments(List.of("xxx", "2", "3"), false)
-        );
-    }
-
-    @Test
-    @DisplayName("Should throw exception when operation is unknown")
-    void shouldThrowExceptionWhenOperationIsUnknown() {
-        assertThatIllegalArgumentException().isThrownBy(() ->
-                OperationFactory.create(List.of("xxx", "2", "6")));
-    }
-
-    @Test
-    @DisplayName("Should verify that empty tokens is NOT a valid operation")
-    void shouldVerifyThatEmptyTokensIsNotAValidOperation() {
-        List<String> tokens = List.of();
-        assertThat(OperationFactory.isOperation(tokens)).isFalse();
-    }
-
-    @Test
-    @DisplayName("Should verify that NOT empty tokens represent an operation")
-    void shouldVerifyThatNotEmptyTokensRepresentAnOperation() {
-        var tokens = List.of("sin", "90");
-        assertThat(OperationFactory.isOperation(tokens)).isTrue();
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "'sin', false",
-            "'mulmul', false",
-            "'mul', true"
-    })
-    @DisplayName("Should verify that operation is known")
-    void shouldVerifyThatOperationIsAllowed(String operationName, boolean expectedResult) {
-        assertThat(OperationFactory.isKnown(operationName)).isEqualTo(expectedResult);
-    }
-
-    @ParameterizedTest
-    @MethodSource("atLeastOneOperandIsPresent")
-    @DisplayName("Should verify that at least one operand is present")
-    void shouldVerifyThatAtLeastOneOperandIsPresent(List<String> tokens, boolean expectedResult) {
-        assertThat(OperationFactory.hasAtLeastOneOperand(tokens)).isEqualTo(expectedResult);
-    }
-
-    static Stream<Arguments> atLeastOneOperandIsPresent() {
-        return Stream.of(
-                arguments(List.of("mul", "1"), true),
-                arguments(List.of("mul", "2", "3"), true),
-                arguments(List.of("mul", "3", "4", "5"), true),
-                arguments(List.of("nop"), false)
+                arguments(new Operation.Multiplier("4", "2"), true),
+                arguments(new Operation.Do(), false),
+                arguments(new Operation.Dont(), false)
         );
     }
 
     @ParameterizedTest
-    @MethodSource("verifyOperationArity")
-    @DisplayName("Should verify operation arity")
-    void shouldVerifyOperationArity(List<String> tokens, int expectedArity) {
-        assertThat(OperationFactory.operationArity(tokens)).isEqualTo(expectedArity);
+    @MethodSource("detectConditionalOperation")
+    @DisplayName("Should detect conditional operations")
+    void shouldDetectConditionalOperations(Operation operation, boolean expectedConditional) {
+        assertThat(OperationFactory.isConditional(operation)).isEqualTo(expectedConditional);
     }
 
-    static Stream<Arguments> verifyOperationArity() {
+    static Stream<Arguments> detectConditionalOperation() {
         return Stream.of(
-                arguments(List.of("mul", "1"), 1),
-                arguments(List.of("mul", "2", "3"), 2),
-                arguments(List.of("mul", "3", "4", "5"), 3)
+                arguments(new Operation.Do(), true),
+                arguments(new Operation.Dont(), true),
+                arguments(new Operation.Multiplier("4", "2"), false)
         );
     }
 
     @ParameterizedTest
     @MethodSource("verifyOperationBinarity")
     @DisplayName("Should verify binarity")
-    void shouldVerifyBinarity(List<String> tokens, boolean expectedBinarity) {
-        assertThat(OperationFactory.isBinaryOperation(tokens)).isEqualTo(expectedBinarity);
+    void shouldVerifyBinarity(List<String> operands, boolean expectedBinarity) {
+        var operation = new Operation.Multiplier(operands);
+        assertThat(OperationFactory.isBinary(operation)).isEqualTo(expectedBinarity);
     }
 
     static Stream<Arguments> verifyOperationBinarity() {
         return Stream.of(
-                arguments(List.of("mul", "1"), false),
-                arguments(List.of("mul", "2", "3"), true),
-                arguments(List.of("mul", "3", "4", "5"), false)
+                arguments(List.of("1"), false),
+                arguments(List.of("2", "3"), true),
+                arguments(List.of("3", "4", "5"), false)
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("numberOfArgumentDigitsConfirmsToConstraint")
-    @DisplayName("Should verify that number of argument digits confirm constraint")
-    void shouldVerifyThatNumberOfArgumentDigitsConfirmsToConstraint(List<String> tokens, boolean expectedResult) {
-        assertThat(OperationFactory.confirmsToArgumentDigitsConstraint(tokens)).isEqualTo(expectedResult);
+    @Test
+    @DisplayName("Should create an unknown operation")
+    void shouldCreateAnUnknownOperation() {
+        final List<String> tokensForUnknownOperation = of("xxx", "42", "1000");
+        assertThat(OperationFactory.create(tokensForUnknownOperation)).isInstanceOf(Operation.Unknown.class);
     }
 
-    static Stream<Arguments> numberOfArgumentDigitsConfirmsToConstraint() {
-        return Stream.of(
-                arguments(List.of("mul", "0", "42", "999"), true),
-                arguments(List.of("mul", "2001"), false),
-                arguments(List.of("mul", "3", "2001", "2"), false)
-        );
-    }
 }

@@ -1,17 +1,20 @@
 package day3;
 
-import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-public class OperationSpliterator implements Spliterator<Operation> {
+public class OperationActivatorSpliterator implements Spliterator<Operation> {
 
     private final Spliterator<Character> sourceSpliterator;
     private final OperationDetector operationDetector;
 
-    public OperationSpliterator(Spliterator<Character> sourceSpliterator, OperationDetector operationDetector) {
+    private Operation conditional;
+
+    public OperationActivatorSpliterator(Spliterator<Character> sourceSpliterator, OperationDetector operationDetector) {
         this.sourceSpliterator = sourceSpliterator;
         this.operationDetector = operationDetector;
+
+        conditional = new Operation.Do();
     }
 
     @Override
@@ -20,10 +23,16 @@ public class OperationSpliterator implements Spliterator<Operation> {
         while (sourceSpliterator.tryAdvance(operationDetector)) {
 
             if (operationDetector.foundOperationTokens()) {
-                List<String> tokens = operationDetector.currentTokens();
-                final Operation operation = OperationFactory.create(tokens);
+                var operation = OperationFactory.create(operationDetector.currentTokens());
 
-                if (OperationFactory.isComputing(operation) && OperationFactory.isBinary(operation)) {
+                if (operation.isConditional()) {
+                    conditional = operation;
+                }
+
+                if (conditional instanceof Operation.Do
+                        && OperationFactory.isComputing(operation)
+                        && OperationFactory.isBinary(operation)) {
+
                     action.accept(operation);
                 }
                 operationDetector.reset();

@@ -5,49 +5,32 @@ import java.util.Set;
 
 class OperationFactory {
 
-    private static final Set<String> ALLOWED_OPERATION_NAMES = Set.of("mul");
+    private static final Set<String> COMPUTING_OPERATION_NAMES = Set.of("mul");
     private static final int MAX_NUMBER_OF_ARGUMENT_DIGITS = 3;
+    private static final Set<String> CONDITIONAL_OPERATION_NAMES = Set.of("do", "dont");
 
     static Operation create(List<String> tokens) {
         return switch (operationName(tokens)) {
             case "mul" -> new Operation.Multiplier(operands(tokens));
-            default -> {
-                throw new IllegalArgumentException("operation %s is unknown".formatted(operationName(tokens)));
-            }
+            case "do" -> new Operation.Do();
+            case "don't" -> new Operation.Dont();
+            default -> new Operation.Unknown(tokens);
         };
     }
 
-    static boolean isRelevantOperation(List<String> tokens) {
-        return isOperation(tokens)
-                && isKnown(operationName(tokens))
-                && isBinaryOperation(tokens);
+    public static boolean isComputing(Operation operation) {
+        return operation instanceof Operation.Multiplier;
     }
 
-    static int operationArity(List<String> tokens) {
-        var operationNameSize = 1;
-        return tokens.size() - operationNameSize;
+    static boolean isConditional(Operation operation) {
+        return operation instanceof Operation.Do || operation instanceof Operation.Dont;
     }
 
-    static boolean isBinaryOperation(List<String> tokens) {
-        return operationArity(tokens) == 2;
-    }
-
-    static boolean isOperation(List<String> tokens) {
-        return !tokens.isEmpty();
-    }
-
-    static boolean isKnown(String operationName) {
-        return ALLOWED_OPERATION_NAMES.contains(operationName);
-    }
-
-    static boolean hasAtLeastOneOperand(List<String> tokens) {
-        final var tokenSizeForUnaryOperation = 2;
-        return tokens.size() >= tokenSizeForUnaryOperation;
-    }
-
-    static boolean confirmsToArgumentDigitsConstraint(List<String> tokens) {
-        return tokens.stream()
-                .noneMatch(token -> token.length() > MAX_NUMBER_OF_ARGUMENT_DIGITS);
+    public static boolean isBinary(Operation operation) {
+        if (operation instanceof Operation.Multiplier multiplier) {
+            return multiplier.factors().size() == 2;
+        }
+        return false;
     }
 
     private static String operationName(List<String> tokens) {

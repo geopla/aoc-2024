@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class OperationTest {
@@ -38,5 +39,14 @@ class OperationTest {
                 arguments(List.of("2", "5"), 10),
                 arguments(List.of("3", "7"), 21)
         );
+    }
+
+    @Test
+    @DisplayName("Should throw exception when computing unknown operation")
+    void shouldThrowExceptionWhenComputingUnknownOperation() {
+        var unknownOperation = new Operation.Unknown(List.of());
+
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+                .isThrownBy(unknownOperation::apply);
     }
 }

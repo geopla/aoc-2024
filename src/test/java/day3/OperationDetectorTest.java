@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.stream.Stream;
 
@@ -23,6 +24,24 @@ class OperationDetectorTest {
     @BeforeEach
     void setUp() {
         operationDetector = new OperationDetector();
+    }
+
+    @Test
+    @DisplayName("Should compute allowed letters of operators")
+    void shouldComputeAllowedOperatorLetters() {
+        var names = List.of("mul", "do", "don't");
+        Set<Character> allowedOperatorLetters = OperationDetector.allowedLettersFromOperators(names);
+
+        assertThat(allowedOperatorLetters).containsOnly('m', 'u', 'l', 'd', 'o', 'n', '\'','t');
+    }
+
+    @Test
+    @DisplayName("Should compute first letters of operators")
+    void shouldComputeFirstLettersOfOperators() {
+        var names = List.of("mul", "do", "don't");
+        Set<Character> allowedOperatorLetters = OperationDetector.firstLettersFromOperators(names);
+
+        assertThat(allowedOperatorLetters).containsOnly('m', 'd');
     }
 
     @Test
@@ -42,6 +61,16 @@ class OperationDetectorTest {
                 .as("found operation")
                 .isTrue();
         assertThat(operationDetector.currentTokens()).containsExactly("mul", "2", "4");
+    }
+
+    @Test
+    @DisplayName("Should detect operation wit zero arguments")
+    void shouldDetectOperationWithZeroArguments() {
+        parseWhole("mul()");
+
+        assertThat(operationDetector.foundOperationTokens())
+                .as("found operation")
+                .isTrue();
     }
 
     @Test
@@ -115,29 +144,13 @@ class OperationDetectorTest {
     void shouldBeResettable() {
         // mul(2,4)mul(3,5)
 
-        operationDetector.accept('m');
-        operationDetector.accept('u');
-        operationDetector.accept('l');
-        operationDetector.accept('(');
-        operationDetector.accept('2');
-        operationDetector.accept(',');
-        operationDetector.accept('4');
-        operationDetector.accept(')');
-
+        "mul(2,4)".codePoints().forEach(c -> operationDetector.accept((char) c));
         assertThat(operationDetector.currentTokens()).containsExactly("mul", "2", "4");
 
         operationDetector.reset();
         assertThat(operationDetector.foundOperationTokens()).isFalse();
 
-        operationDetector.accept('m');
-        operationDetector.accept('u');
-        operationDetector.accept('l');
-        operationDetector.accept('(');
-        operationDetector.accept('3');
-        operationDetector.accept(',');
-        operationDetector.accept('5');
-        operationDetector.accept(')');
-
+        "mul(3,5)".codePoints().forEach(c -> operationDetector.accept((char) c));
         assertThat(operationDetector.currentTokens()).containsExactly("mul", "3", "5");
     }
 

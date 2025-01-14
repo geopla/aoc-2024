@@ -36,10 +36,12 @@ Lessons learned
   - both points above will ease the implementation of the operations detector
 - Filter the operations stream for name and arity to get the correct result
 - Speed of development is irrelevant; focus on learnings with Spliterators
+- Regarding part two with disabling and enabling whole memory sections, the decision is to implement a dedicated
+`OperationActivatorSpliterator`, throwing away all operations within a deactivated section.
 
 ### Implementation
 
-#### State Machine Happy Path
+#### State machine happy path
 This is the state machine assuming when only valid input happens. It is not the real implementation but serves
 to show the principle:
 
@@ -55,7 +57,7 @@ stateDiagram-v2
     ARGUMENT --> [*]: ')'
 ````
 
-#### State Machine with Error Handling
+#### State machine with error handling
 - while in start state, simply discard any input characters not switching to OP_NAME
 - in every other state, input that does not switch to the next state, or remains in the current state,
   might be the start of a valid operation name
@@ -75,5 +77,24 @@ stateDiagram-v2
   ARGUMENT --> OP_NAME: 'm'
   ARGUMENT_TERMINATOR --> ARGUMENT: [0..9]
   ARGUMENT_TERMINATOR --> OP_NAME: 'm'
+  ARGUMENT --> [*]: ')'
+````
+
+#### State machine allowing 0-ary operations too
+The second part of the task requires detection of 0-ary operations too. The additional operation names are `do` and `dont`.
+````mermaid
+stateDiagram-v2
+  START --> OP_NAME: 'm'
+  note left of START: Any input not mentioned switches to this start state
+  OP_NAME --> OP_NAME: [a..z] and '
+  OP_NAME --> OP_NAME_TERMINATOR: '('
+  OP_NAME_TERMINATOR --> ARGUMENT: [0..9]
+  OP_NAME_TERMINATOR --> OP_NAME: 'm,d'
+  OP_NAME_TERMINATOR --> [*]: ')'
+  ARGUMENT --> ARGUMENT: [0..9]
+  ARGUMENT --> ARGUMENT_TERMINATOR: ','
+  ARGUMENT --> OP_NAME: 'm,d'
+  ARGUMENT_TERMINATOR --> ARGUMENT: [0..9]
+  ARGUMENT_TERMINATOR --> OP_NAME: 'm,d'
   ARGUMENT --> [*]: ')'
 ````
