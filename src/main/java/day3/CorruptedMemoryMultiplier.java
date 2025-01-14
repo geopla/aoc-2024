@@ -11,6 +11,8 @@ import java.util.stream.StreamSupport;
 
 public class CorruptedMemoryMultiplier {
 
+    // --- part one
+
     static int multipliersSumFrom(String resourceNamme) {
 
         try (InputStream resourceAsStream = CorruptedMemoryMultiplier.class.getResourceAsStream(resourceNamme)) {
@@ -35,6 +37,8 @@ public class CorruptedMemoryMultiplier {
         return StreamSupport.stream(operationSpliterator, false);
     }
 
+    // --- part two
+
     static int multipliersWithConditionalsSumFrom(String resourceNamme) {
 
         try (InputStream resourceAsStream = CorruptedMemoryMultiplier.class.getResourceAsStream(resourceNamme)) {
@@ -58,6 +62,8 @@ public class CorruptedMemoryMultiplier {
 
         return StreamSupport.stream(operationSpliterator, false);
     }
+
+    // -- IO stuff
 
     static Stream<Character> toCharacterStream(InputStream inputStream) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -96,5 +102,4 @@ public class CorruptedMemoryMultiplier {
             }
         }, false);
     }
-
 }
