@@ -17,6 +17,11 @@ Lessons learned
 - streams can be reused with some effort
 
 ## Day 3 - Mull It Over
+Lessions learned
+- good ol' state machine as consumer to the rescue
+- spliterators are fun
+- stick to TDD
+
 ### From the Requirements
 - Input might become huge
 - Digit size of arguments is restricted
@@ -35,6 +40,7 @@ Lessons learned
 - Allow detection of n-ary operations
   - both points above will ease the implementation of the operations detector
 - Filter the operations stream for name and arity to get the correct result
+- digit size of argument is actually not a constraint but a hint that we don't need to take care in the input length 
 - Speed of development is irrelevant; focus on learnings with Spliterators
 - Regarding part two with disabling and enabling whole memory sections, the decision is to implement a dedicated
 `OperationActivatorSpliterator`, throwing away all operations within a deactivated section.
@@ -81,7 +87,7 @@ stateDiagram-v2
 ````
 
 #### State machine allowing 0-ary operations too
-The second part of the task requires detection of 0-ary operations too. The additional operation names are `do` and `dont`.
+The second part of the task requires detection of 0-ary operations too. The additional operation names are `do` and `don't`.
 ````mermaid
 stateDiagram-v2
   START --> OP_NAME: 'm'
