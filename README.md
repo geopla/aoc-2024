@@ -104,3 +104,34 @@ stateDiagram-v2
   ARGUMENT_TERMINATOR --> OP_NAME: 'm,d'
   ARGUMENT --> [*]: ')'
 ````
+
+## Day 4
+
+### Star search idea
+The idea is to build a star from every input point and check each ray for `XMAS`.
+```
+\  |  /
+ \ | /
+  \|/
+---X---
+  /|\
+ / | \
+/  |  \
+```
+### Domain language
+**Text Block** a sequenced list of text lines  
+**Text Line** a single line of the text block, a `CharSequence`  
+**Cardinal direction** N, NE, E, SE, S, SW, W, NW  
+**Ray** a sequence of characters with a given max length, starting from a position in a cardinal direction  
+**Star**  a collection of rays; note that rays might be shorter than given or even being empty  
+
+### The PLN
+- Implement `TextBlock`
+  - Input from file
+  - Input from CharSequence
+- Implement `Star`
+  - Input `TextBlock`, Position as tupel `(line, column)`
+  - Output `Stream<Ray>`
+- Get a `Stream<Star>` from `TextBlock`
+- Process all stars by evaluating its rays (the XMAS count)
+
