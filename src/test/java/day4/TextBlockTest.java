@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
 
@@ -22,6 +26,23 @@ class TextBlockTest {
             MAMMMXMMMM
             MXMXAXMASX""";
 
+    @Test
+    @DisplayName("Should provide stream of all stars")
+    void shouldProvideStreamOfAllStars() {
+        var textBlock = TextBlock.from(inputSample);
+
+        String starCenters = textBlock.stars()
+                .map(Star::centerValue)
+                .collect(Collector.of(
+                        StringBuilder::new,
+                        StringBuilder::append,
+                        StringBuilder::append,
+                        StringBuilder::toString));
+
+        var inputSampleWithoutNewLines = inputSample.lines().collect(Collectors.joining());
+
+        assertThat(starCenters).isEqualTo(inputSampleWithoutNewLines);
+    }
 
     @Test
     @DisplayName("Should provide Star on position top left")

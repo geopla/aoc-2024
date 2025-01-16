@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 class TextBlock {
 
@@ -21,6 +24,46 @@ class TextBlock {
 
     static TextBlock from(String input) {
         return new TextBlock(input.lines());
+    }
+
+    Stream<Star> stars() {
+        return StreamSupport.stream(new Spliterator<>() {
+
+            int x = 0;
+            int y = 0;
+
+            @Override
+            public boolean tryAdvance(Consumer<? super Star> action) {
+                action.accept(star(x, y));
+
+                if (hasCharAt(x + 1, y)) {
+                    ++x;
+                    return true;
+                }
+                else if (hasCharAt(0, y + 1)) {
+                    x = 0;
+                    ++y;
+                    return true;
+                }
+
+                return false;
+            }
+
+            @Override
+            public Spliterator<Star> trySplit() {
+                return null;
+            }
+
+            @Override
+            public long estimateSize() {
+                return 0;
+            }
+
+            @Override
+            public int characteristics() {
+                return 0;
+            }
+        }, false);
     }
 
     Star star() {
