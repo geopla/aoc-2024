@@ -1,11 +1,21 @@
 package day4;
 
+import java.util.Objects;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
+
 public class Star {
 
     record Position(int x, int y) {
+
     }
 
-    enum CardinalDirection {
+    public record Ray(CardinalDirection cardinalDirection, String value) {
+
+    }
+
+
+    public enum CardinalDirection {
         NORTH,
         NORTH_EAST,
         EAST,
@@ -25,12 +35,41 @@ public class Star {
         this.position = position;
     }
 
-    Position position() {
-        return this.position;
+    public Ray ray(CardinalDirection cardinalDirection) {
+        String value = Stream.iterate(
+                        this,
+                        Objects::nonNull,
+                        star -> star.hasNeighbourTo(cardinalDirection) ? star.neighbourTo(cardinalDirection) : null
+                )
+                .map(Star::centerValue)
+                .collect(Collector.of(
+                        StringBuilder::new,
+                        StringBuilder::append,
+                        StringBuilder::append,
+                        StringBuilder::toString));
+
+        return new Ray(cardinalDirection, value);
     }
 
     char centerValue() {
         return textBlock.charAt(position.x, position.y);
+    }
+
+    Position position() {
+        return this.position;
+    }
+
+    public Star neighbourTo(CardinalDirection cardinalDirection) {
+        return switch (cardinalDirection) {
+            case NORTH -> new Star(textBlock, new Position(position.x, position.y - 1));
+            case NORTH_EAST -> new Star(textBlock, new Position(position.x + 1, position.y - 1));
+            case EAST -> new Star(textBlock, new Position(position.x + 1, position.y));
+            case SOUTH_EAST -> new Star(textBlock, new Position(position.x + 1, position.y + 1));
+            case SOUTH -> new Star(textBlock, new Position(position.x, position.y + 1));
+            case SOUTH_WEST -> new Star(textBlock, new Position(position.x - 1, position.y + 1));
+            case WEST -> new Star(textBlock, new Position(position.x - 1, position.y));
+            case NORTH_WEST -> new Star(textBlock, new Position(position.x - 1, position.y - 1));
+        };
     }
 
     boolean hasNeighbourTo(CardinalDirection cardinalDirection) {
@@ -47,11 +86,11 @@ public class Star {
     }
 
     private boolean hasNeighbourToTheNorth() {
-        return textBlock.hasCharAt(position.x, position.y -1);
+        return textBlock.hasCharAt(position.x, position.y - 1);
     }
 
     private boolean hasNeighbourToTheNorthEast() {
-        return textBlock.hasCharAt(position.x + 1, position.y -1);
+        return textBlock.hasCharAt(position.x + 1, position.y - 1);
     }
 
     private boolean hasNeighbourToTheEast() {

@@ -2,6 +2,7 @@ package day4;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.NamedExecutable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -39,6 +40,57 @@ class StarTest {
                 MAMMMXMMMM
                 MXMXAXMASX
                 """
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("rayInGivenDirection")
+    @DisplayName("Should have ray in given direction")
+    void shouldHaveRayInGivenDirection(Star.CardinalDirection cardinalDirection, String expectedRayValue) {
+        var star = textBlock.star(2, 1);
+
+        Star.Ray ray = star.ray(cardinalDirection);
+
+        assertThat(ray.value()).isEqualTo(expectedRayValue);
+    }
+
+    static Stream<Arguments> rayInGivenDirection() {
+        return Stream.of(
+                arguments(NORTH, "AM"),
+                arguments(NORTH_EAST, "AS"),
+                arguments(EAST, "AMXMSMSA"),
+                arguments(SOUTH_EAST, "ASAMXXAM"),
+                arguments(SOUTH, "AXAAASXMM"),
+                arguments(SOUTH_WEST, "AMM"),
+                arguments(WEST, "ASM"),
+                arguments(NORTH_WEST, "AM")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideItsNeighbours")
+    @DisplayName("Should provide its neighbours")
+    void shouldProvideItsNeighbours(Star.CardinalDirection cardinalDirection, char expectedStar) {
+        var star = TextBlock.from("""
+                ABCDE
+                FGHIJ
+                KLMNO""").star(1, 1);
+
+        Star neighbour = star.neighbourTo(cardinalDirection);
+
+        assertThat(neighbour.centerValue()).isEqualTo(expectedStar);
+    }
+
+    static Stream<Arguments> provideItsNeighbours() {
+        return Stream.of(
+                arguments(NORTH, 'B'),
+                arguments(NORTH_EAST, 'C'),
+                arguments(EAST, 'H'),
+                arguments(SOUTH_EAST, 'M'),
+                arguments(SOUTH, 'L'),
+                arguments(SOUTH_WEST, 'K'),
+                arguments(WEST, 'F'),
+                arguments(NORTH_WEST, 'A')
         );
     }
 
