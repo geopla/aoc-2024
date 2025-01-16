@@ -23,6 +23,28 @@ class TextBlock {
         return new TextBlock(input.lines());
     }
 
+    Star star() {
+        return new Star(this, new Star.Position(0, 0));
+    }
+
+    boolean hasCharAt(int x, int y) {
+
+        if (y < 0 || y > lines.size() - 1) {
+            return false;
+        }
+        if (x < 0 || x > lines.get(y).length() - 1) {
+            return false;
+        }
+        return true;
+    }
+
+    char charAt(int x, int y) {
+        String line = lines.get(y);
+        return line.charAt(x);
+    }
+
+    // Stuff intended for debugging and testing
+
     Stream<String> lines() {
         return lines.stream();
     }

@@ -118,9 +118,11 @@ The idea is to build a star from every input point and check each ray for `XMAS`
  / | \
 /  |  \
 ```
-### Domain language
+### Domain concepts
 **Text Block** a sequenced list of text lines  
 **Text Line** a single line of the text block, a `CharSequence`  
+**X** column coordinates eastwards (from left to right), counting from 0
+**Y** line coordinates southwards (from top to down), counting from 0  
 **Cardinal direction** N, NE, E, SE, S, SW, W, NW  
 **Ray** a sequence of characters with a given max length, starting from a position in a cardinal direction  
 **Star**  a collection of rays; note that rays might be shorter than given or even being empty  
