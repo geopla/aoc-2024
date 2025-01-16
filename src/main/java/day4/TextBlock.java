@@ -9,10 +9,10 @@ import java.util.stream.Stream;
 
 class TextBlock {
 
-    private List<String> lines;
+    private final List<String> lines;
 
     private TextBlock(Stream<String> lines) {
-        this.lines = lines.collect(Collectors.toUnmodifiableList());
+        this.lines = lines.toList();
     }
 
     static TextBlock from(InputStream input) {
@@ -24,11 +24,17 @@ class TextBlock {
     }
 
     Star star() {
-        return new Star(this, new Star.Position(0, 0));
+        return star(0, 0);
+    }
+
+    public Star star(int x, int y) {
+        if (hasCharAt(x, y)) {
+            return new Star(this, new Star.Position(x, y));
+        }
+        throw new IndexOutOfBoundsException("no star at position x=%d, y=%d".formatted(x, y));
     }
 
     boolean hasCharAt(int x, int y) {
-
         if (y < 0 || y > lines.size() - 1) {
             return false;
         }

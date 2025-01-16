@@ -16,9 +16,9 @@ public class Star {
         NORTH_WEST;
     }
 
-    private TextBlock textBlock;
+    private final TextBlock textBlock;
 
-    private Position position;
+    private final Position position;
 
     Star(TextBlock textBlock, Position position) {
         this.textBlock = textBlock;
@@ -33,28 +33,48 @@ public class Star {
         return textBlock.charAt(position.x, position.y);
     }
 
-    boolean hasNeighbour(CardinalDirection cardinalDirection) {
+    boolean hasNeighbourTo(CardinalDirection cardinalDirection) {
         return switch (cardinalDirection) {
             case NORTH -> hasNeighbourToTheNorth();
             case NORTH_EAST -> hasNeighbourToTheNorthEast();
-            case EAST -> hasNeighbourToTheNorthEast();
-            case SOUTH_EAST -> hasNeighbourToTheEast();
-            case SOUTH -> false;
-            case SOUTH_WEST -> false;
-            case WEST -> false;
-            case NORTH_WEST -> false;
+            case EAST -> hasNeighbourToTheEast();
+            case SOUTH_EAST -> hasNeighbourToTheSouthEast();
+            case SOUTH -> hasNeighbourToTheSouth();
+            case SOUTH_WEST -> hasNeighbourToTheSouthWest();
+            case WEST -> hasNeighbourToTheWest();
+            case NORTH_WEST -> hasNeighbourToTheNorthWest();
         };
     }
 
     private boolean hasNeighbourToTheNorth() {
-        return false;
+        return textBlock.hasCharAt(position.x, position.y -1);
     }
 
     private boolean hasNeighbourToTheNorthEast() {
-        return false;
+        return textBlock.hasCharAt(position.x + 1, position.y -1);
     }
 
     private boolean hasNeighbourToTheEast() {
-        return false;
+        return textBlock.hasCharAt(position.x + 1, position.y);
+    }
+
+    private boolean hasNeighbourToTheSouthEast() {
+        return textBlock.hasCharAt(position.x + 1, position.y + 1);
+    }
+
+    private boolean hasNeighbourToTheSouth() {
+        return textBlock.hasCharAt(position.x, position.y + 1);
+    }
+
+    private boolean hasNeighbourToTheSouthWest() {
+        return textBlock.hasCharAt(position.x - 1, position.y + 1);
+    }
+
+    private boolean hasNeighbourToTheWest() {
+        return textBlock.hasCharAt(position.x - 1, position.y);
+    }
+
+    private boolean hasNeighbourToTheNorthWest() {
+        return textBlock.hasCharAt(position.x - 1, position.y - 1);
     }
 }
