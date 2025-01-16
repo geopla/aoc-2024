@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
@@ -24,6 +25,23 @@ class TextBlockTest {
             SAXAMASAAA
             MAMMMXMMMM
             MXMXAXMASX""";
+
+    @Test
+    @DisplayName("Should provide all rays")
+    void shouldProvideAllRays() {
+        var textBlock =TextBlock.from("""
+                AB
+                CD""");
+
+        Stream<Star.Ray> rays = textBlock.rays();
+
+        assertThat(rays.map(Star.Ray::value)).contains(
+                "AB", "AD", "AC",
+                "BD", "BC", "BA",
+                "DB", "DC", "DA",
+                "CA", "CB", "CD"
+        );
+    }
 
     @Test
     @DisplayName("Should provide stream of all stars")

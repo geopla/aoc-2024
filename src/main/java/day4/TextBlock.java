@@ -55,14 +55,20 @@ class TextBlock {
 
             @Override
             public long estimateSize() {
-                return 0;
+                return String.join("", lines).length();
             }
 
             @Override
             public int characteristics() {
+                // TODO
                 return 0;
             }
         }, false);
+    }
+
+    Stream<Star.Ray> rays() {
+        return stars()
+                .flatMap(Star::rays);
     }
 
     Star star() {
