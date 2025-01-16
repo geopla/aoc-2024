@@ -2,7 +2,6 @@ package day4;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.NamedExecutable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,14 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static day4.Star.CardinalDirection.EAST;
-import static day4.Star.CardinalDirection.NORTH;
-import static day4.Star.CardinalDirection.NORTH_EAST;
-import static day4.Star.CardinalDirection.NORTH_WEST;
-import static day4.Star.CardinalDirection.SOUTH;
-import static day4.Star.CardinalDirection.SOUTH_EAST;
-import static day4.Star.CardinalDirection.SOUTH_WEST;
-import static day4.Star.CardinalDirection.WEST;
+import static day4.Star.CardinalDirection.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -43,6 +35,41 @@ class StarTest {
         );
     }
 
+    @Test
+    @DisplayName("Should provide its rays")
+    void shouldProvideItsRays() {
+        var star = textBlock.star(2, 1);
+
+        assertThat(star.rays()).containsExactly(
+                new Star.Ray(NORTH, "AM"),
+                new Star.Ray(NORTH_EAST, "AS"),
+                new Star.Ray(EAST, "AMXMSMSA"),
+                new Star.Ray(SOUTH_EAST, "ASAMXXAM"),
+                new Star.Ray(SOUTH, "AXAAASXMM"),
+                new Star.Ray(SOUTH_WEST, "AMM"),
+                new Star.Ray(WEST, "ASM"),
+                new Star.Ray(NORTH_WEST, "AM")
+        );
+    }
+
+    @Test
+    @DisplayName("Should provide its length limited rays")
+    void shouldProvideItsLengthLimitedRays() {
+        var star = textBlock.star(2, 1);
+        var maxRayLength = 3;
+
+        assertThat(star.rays(maxRayLength)).containsExactly(
+                new Star.Ray(NORTH, "AM"),
+                new Star.Ray(NORTH_EAST, "AS"),
+                new Star.Ray(EAST, "AMX"),
+                new Star.Ray(SOUTH_EAST, "ASA"),
+                new Star.Ray(SOUTH, "AXA"),
+                new Star.Ray(SOUTH_WEST, "AMM"),
+                new Star.Ray(WEST, "ASM"),
+                new Star.Ray(NORTH_WEST, "AM")
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("rayInGivenDirection")
     @DisplayName("Should have ray in given direction")
@@ -61,6 +88,30 @@ class StarTest {
                 arguments(EAST, "AMXMSMSA"),
                 arguments(SOUTH_EAST, "ASAMXXAM"),
                 arguments(SOUTH, "AXAAASXMM"),
+                arguments(SOUTH_WEST, "AMM"),
+                arguments(WEST, "ASM"),
+                arguments(NORTH_WEST, "AM")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("limitedRayInGivenDirection")
+    @DisplayName("Should have ray limited by length in given direction")
+    void shouldHaveLimitedRayInGivenDirection(Star.CardinalDirection cardinalDirection, String expectedRayValue) {
+        var star = textBlock.star(2, 1);
+        var maxRayLength = 3;
+        Star.Ray ray = star.ray(cardinalDirection, maxRayLength);
+
+        assertThat(ray.value()).isEqualTo(expectedRayValue);
+    }
+
+    static Stream<Arguments> limitedRayInGivenDirection() {
+        return Stream.of(
+                arguments(NORTH, "AM"),
+                arguments(NORTH_EAST, "AS"),
+                arguments(EAST, "AMX"),
+                arguments(SOUTH_EAST, "ASA"),
+                arguments(SOUTH, "AXA"),
                 arguments(SOUTH_WEST, "AMM"),
                 arguments(WEST, "ASM"),
                 arguments(NORTH_WEST, "AM")

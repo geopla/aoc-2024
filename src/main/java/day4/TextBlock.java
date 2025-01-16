@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -81,10 +80,7 @@ class TextBlock {
         if (y < 0 || y > lines.size() - 1) {
             return false;
         }
-        if (x < 0 || x > lines.get(y).length() - 1) {
-            return false;
-        }
-        return true;
+        return x >= 0 && x <= lines.get(y).length() - 1;
     }
 
     char charAt(int x, int y) {
@@ -100,6 +96,6 @@ class TextBlock {
 
     @Override
     public String toString() {
-        return lines.stream().collect(Collectors.joining("\n"));
+        return String.join("\n", lines);
     }
 }

@@ -1,19 +1,15 @@
 package day4;
 
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 public class Star {
 
-    record Position(int x, int y) {
+    record Position(int x, int y) { }
 
-    }
-
-    public record Ray(CardinalDirection cardinalDirection, String value) {
-
-    }
-
+    public record Ray(CardinalDirection cardinalDirection, String value) { }
 
     public enum CardinalDirection {
         NORTH,
@@ -27,7 +23,6 @@ public class Star {
     }
 
     private final TextBlock textBlock;
-
     private final Position position;
 
     Star(TextBlock textBlock, Position position) {
@@ -35,12 +30,39 @@ public class Star {
         this.position = position;
     }
 
-    public Ray ray(CardinalDirection cardinalDirection) {
+    Stream<Ray> rays() {
+        return EnumSet.allOf(CardinalDirection.class).stream()
+                .map(this::ray);
+    }
+
+    Stream<Ray> rays(int maxRayLength) {
+        return EnumSet.allOf(CardinalDirection.class).stream()
+                .map(cardinalDirection -> ray(cardinalDirection, maxRayLength));
+    }
+
+    Ray ray(CardinalDirection cardinalDirection) {
         String value = Stream.iterate(
                         this,
                         Objects::nonNull,
                         star -> star.hasNeighbourTo(cardinalDirection) ? star.neighbourTo(cardinalDirection) : null
                 )
+                .map(Star::centerValue)
+                .collect(Collector.of(
+                        StringBuilder::new,
+                        StringBuilder::append,
+                        StringBuilder::append,
+                        StringBuilder::toString));
+
+        return new Ray(cardinalDirection, value);
+    }
+
+    Ray ray(CardinalDirection cardinalDirection, int maxRayLength) {
+        String value = Stream.iterate(
+                        this,
+                        Objects::nonNull,
+                        star -> star.hasNeighbourTo(cardinalDirection) ? star.neighbourTo(cardinalDirection) : null
+                )
+                .limit(maxRayLength)
                 .map(Star::centerValue)
                 .collect(Collector.of(
                         StringBuilder::new,
