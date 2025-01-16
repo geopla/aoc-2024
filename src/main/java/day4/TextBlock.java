@@ -17,15 +17,15 @@ class TextBlock {
         this.lines = lines.toList();
     }
 
-    static TextBlock from(InputStream input) {
+    public static TextBlock from(InputStream input) {
         return new TextBlock(new BufferedReader(new InputStreamReader(input)).lines());
     }
 
-    static TextBlock from(String input) {
+    public static TextBlock from(String input) {
         return new TextBlock(input.lines());
     }
 
-    Stream<Star> stars() {
+    public Stream<Star> stars() {
         return StreamSupport.stream(new Spliterator<>() {
 
             int x = 0;
@@ -66,7 +66,7 @@ class TextBlock {
         }, false);
     }
 
-    Stream<Star.Ray> rays() {
+    public Stream<Star.Ray> rays() {
         return stars()
                 .flatMap(Star::rays);
     }

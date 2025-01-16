@@ -19,7 +19,7 @@ public class Star {
         SOUTH,
         SOUTH_WEST,
         WEST,
-        NORTH_WEST;
+        NORTH_WEST
     }
 
     private final TextBlock textBlock;
