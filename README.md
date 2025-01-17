@@ -144,3 +144,6 @@ Computing of rays may return one element rays. This contradicts the semantics of
 **Payback** Implement returning an `Optional<Ray>` when no ray is computed because the star is on a text block border.
 This is the very purpose of an `Optional` anyway.
 
+Actually the constraint won't have any impact on the planned solution finding 'XMAS' on the rays. But it will result
+into a slightly better performance because the one element rays are sorted out (round about 2 * lines + 2 * columns)
+
