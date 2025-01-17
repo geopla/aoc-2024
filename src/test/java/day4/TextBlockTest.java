@@ -27,6 +27,30 @@ class TextBlockTest {
             MXMXAXMASX""";
 
     @Test
+    @DisplayName("Should provide all rays with length limited")
+    void shouldProvideAllRaysWithLengthLimited() {
+        var textBlock =TextBlock.from("""
+                ABC
+                DEF
+                GHI""");
+
+        var maxLength = 2;
+        Stream<Star.Ray> rays = textBlock.rays(maxLength);
+
+        assertThat(rays.map(Star.Ray::value)).containsExactlyInAnyOrder(
+                "AB", "AE", "AD",
+                "BC", "BF", "BE", "BD", "BA",
+                "CF", "CE", "CB",
+                "DA", "DB", "DE", "DH", "DG",
+                "EB", "EC", "EF", "EI", "EH", "EG", "ED", "EA",
+                "FC", "FI", "FH", "FE", "FB",
+                "GD", "GE", "GH",
+                "HE", "HF", "HI", "HG", "HD",
+                "IF", "IH", "IE"
+        );
+    }
+
+    @Test
     @DisplayName("Should provide all rays")
     void shouldProvideAllRays() {
         var textBlock =TextBlock.from("""

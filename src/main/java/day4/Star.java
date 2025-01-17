@@ -2,6 +2,7 @@ package day4;
 
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
@@ -32,12 +33,22 @@ public class Star {
 
     Stream<Ray> rays() {
         return EnumSet.allOf(CardinalDirection.class).stream()
-                .map(this::ray);
+                .map(this::ray)
+                .filter(rayWithAtLeastTwoElements());
     }
 
     Stream<Ray> rays(int maxRayLength) {
+        if (maxRayLength < 2) {
+            throw new IllegalArgumentException("a ray can't be limited to less than two elements");
+        }
+
         return EnumSet.allOf(CardinalDirection.class).stream()
-                .map(cardinalDirection -> ray(cardinalDirection, maxRayLength));
+                .map(cardinalDirection -> ray(cardinalDirection, maxRayLength))
+                .filter(rayWithAtLeastTwoElements());
+    }
+
+    private static Predicate<Ray> rayWithAtLeastTwoElements() {
+        return ray -> ray.value.length() > 1;
     }
 
     Ray ray(CardinalDirection cardinalDirection) {
@@ -52,6 +63,11 @@ public class Star {
                         StringBuilder::append,
                         StringBuilder::append,
                         StringBuilder::toString));
+
+        // TODO return an Optional<Ray>
+        // here we allow rays consisting only of the stars center value too
+        // as quick fix the ray()'s methods take care of this
+        // in case of no ray computation actually happens an Optional should be returned
 
         return new Ray(cardinalDirection, value);
     }
@@ -69,6 +85,11 @@ public class Star {
                         StringBuilder::append,
                         StringBuilder::append,
                         StringBuilder::toString));
+
+        // TODO return an Optional<Ray>
+        // here we allow rays consisting only of the stars center value too
+        // as quick fix the ray()'s methods take care of this
+        // in case of no ray computation actually happens an Optional should be returned
 
         return new Ray(cardinalDirection, value);
     }

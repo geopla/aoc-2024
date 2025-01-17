@@ -124,7 +124,7 @@ The idea is to build a star from every input point and check each ray for `XMAS`
 **X** column coordinates eastwards (from left to right), counting from 0
 **Y** line coordinates southwards (from top to down), counting from 0  
 **Cardinal direction** N, NE, E, SE, S, SW, W, NW  
-**Ray** a sequence of characters with a given max length, starting from a position in a cardinal direction  
+**Ray** a sequence of at least two characters with a given max length, starting from a position in a cardinal direction  
 **Star**  a collection of rays; note that rays might be shorter than given or even being empty  
 
 ### The PLN
@@ -136,4 +136,11 @@ The idea is to build a star from every input point and check each ray for `XMAS`
   - Output `Stream<Ray>`
 - Get a `Stream<Star>` from `TextBlock`
 - Process all stars by evaluating its rays (the XMAS count)
+
+### Technical Debts
+#### Computing of rays
+Computing of rays may return one element rays. This contradicts the semantics of rays.
+**Debt** Fixed by filtering rays  
+**Payback** Implement returning an `Optional<Ray>` when no ray is computed because the star is on a text block border.
+This is the very purpose of an `Optional` anyway.
 

@@ -5,13 +5,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static day4.Star.CardinalDirection.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class StarTest {
@@ -116,6 +119,78 @@ class StarTest {
                 arguments(WEST, "ASM"),
                 arguments(NORTH_WEST, "AM")
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("haveOnlyRaysWithAtLeastTwoElements")
+    @DisplayName("Should have only rays with at least two elements")
+    void shouldHaveOnlyRaysWithAtLeastTwoElements(char starCenterValue, Set<String> expectedRays) {
+        var textBlock = TextBlock.from("""
+                ABC
+                DEF
+                GHI""");
+
+        Star starToEvaluate = textBlock.stars()
+                .filter(star -> star.centerValue() == starCenterValue)
+                .findFirst()
+                .get();
+
+        assertThat(starToEvaluate.rays().map(Star.Ray::value)).containsExactlyInAnyOrderElementsOf(expectedRays);
+    }
+
+    static Stream<Arguments> haveOnlyRaysWithAtLeastTwoElements() {
+        return Stream.of(
+                arguments('A', Set.of("ABC", "AEI", "ADG")),
+                arguments('B', Set.of("BC", "BF", "BEH", "BD", "BA")),
+                arguments('C', Set.of("CFI", "CEG", "CBA")),
+                arguments('D', Set.of("DA", "DB", "DEF", "DH", "DG")),
+                arguments('E', Set.of("EB", "EC", "EF", "EI", "EH", "EG", "ED", "EA")),
+                arguments('F', Set.of("FC", "FI", "FH", "FED", "FB")),
+                arguments('G', Set.of("GDA", "GEC", "GHI")),
+                arguments('H', Set.of("HEB", "HF", "HI", "HG", "HD"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("haveOnlyLengthLimitedRaysWithAtLeastTwoElements")
+    @DisplayName("Should have only length limited rays with at least two elements")
+    void shouldHaveOnlyLengthLimitedRaysWithAtLeastTwoElements(char starCenterValue, Set<String> expectedRays) {
+        var textBlock = TextBlock.from("""
+                ABC
+                DEF
+                GHI""");
+
+        Star starToEvaluate = textBlock.stars()
+                .filter(star -> star.centerValue() == starCenterValue)
+                .findFirst()
+                .get();
+
+        var lengthLimit = 2;
+        assertThat(starToEvaluate.rays(lengthLimit).map(Star.Ray::value)).containsExactlyInAnyOrderElementsOf(expectedRays);
+    }
+
+    static Stream<Arguments> haveOnlyLengthLimitedRaysWithAtLeastTwoElements() {
+        return Stream.of(
+                arguments('A', Set.of("AB", "AE", "AD")),
+                arguments('B', Set.of("BC", "BF", "BE", "BD", "BA")),
+                arguments('C', Set.of("CF", "CE", "CB")),
+                arguments('D', Set.of("DA", "DB", "DE", "DH", "DG")),
+                arguments('E', Set.of("EB", "EC", "EF", "EI", "EH", "EG", "ED", "EA")),
+                arguments('F', Set.of("FC", "FI", "FH", "FE", "FB")),
+                arguments('G', Set.of("GD", "GE", "GH")),
+                arguments('H', Set.of("HE", "HF", "HI", "HG", "HD"))
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "1", "0", "-1"
+    })
+    @DisplayName("Should reject request for rays limited to less than two elements")
+    void shouldRejectRequestForRaysLimitedToLessThanTwoElements(int maxRayLength) {
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                        textBlock.star().rays(maxRayLength))
+                .withMessage("a ray can't be limited to less than two elements");
     }
 
     @ParameterizedTest

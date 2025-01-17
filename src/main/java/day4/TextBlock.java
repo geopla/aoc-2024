@@ -1,5 +1,7 @@
 package day4;
 
+import day4.Star.Ray;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,6 +25,16 @@ class TextBlock {
 
     public static TextBlock from(String input) {
         return new TextBlock(input.lines());
+    }
+
+    public Stream<Ray> rays() {
+        return stars()
+                .flatMap(Star::rays);
+    }
+
+    public Stream<Ray> rays(int maxLength) {
+        return stars()
+                .flatMap(star -> star.rays(maxLength));
     }
 
     public Stream<Star> stars() {
@@ -64,11 +76,6 @@ class TextBlock {
                 return 0;
             }
         }, false);
-    }
-
-    public Stream<Star.Ray> rays() {
-        return stars()
-                .flatMap(Star::rays);
     }
 
     Star star() {
