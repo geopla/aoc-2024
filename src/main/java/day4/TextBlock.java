@@ -13,6 +13,12 @@ import java.util.stream.StreamSupport;
 
 class TextBlock {
 
+    public long rayCount(String text) {
+        return rays(text.length())
+                .filter(ray -> ray.value().equals(text))
+                .count();
+    }
+
     private final List<String> lines;
 
     private TextBlock(Stream<String> lines) {

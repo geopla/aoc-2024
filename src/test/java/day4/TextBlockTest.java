@@ -27,6 +27,36 @@ class TextBlockTest {
             MXMXAXMASX""";
 
     @Test
+    @DisplayName("Should find ONE string when present")
+    void shouldFindOneString() {
+        var textBlock =TextBlock.from("""
+                _X____
+                __M___
+                ___A__
+                ____S_
+                ______""");
+
+        long count = textBlock.rayCount("XMAS");
+
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Should find multiple strings when present")
+    void shouldFindMultipleStrings() {
+        var textBlock =TextBlock.from("""
+                _X____
+                __M_S_
+                ___A__
+                _XMAS_
+                _X____""");
+
+        long count = textBlock.rayCount("XMAS");
+
+        assertThat(count).isEqualTo(3);
+    }
+
+    @Test
     @DisplayName("Should provide all rays with length limited")
     void shouldProvideAllRaysWithLengthLimited() {
         var textBlock =TextBlock.from("""
