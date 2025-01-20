@@ -27,6 +27,18 @@ class TextBlockTest {
             MXMXAXMASX""";
 
     @Test
+    @DisplayName("Should count input from challenge")
+    void shouldCountInputFromChallenge() {
+        var resourceName = "../day-4-input.txt";
+        var input = TextBlock.class.getResourceAsStream(resourceName);
+        TextBlock textBlock = TextBlock.from(input);
+
+        long count = textBlock.rayCount("XMAS");
+
+        assertThat(count).isEqualTo(2336L);
+    }
+
+    @Test
     @DisplayName("")
     void shouldCountSampleFromChallenge() {
         var textBlock = TextBlock.from(inputSample);
