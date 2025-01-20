@@ -39,6 +39,110 @@ class StarTest {
     }
 
     @Test
+    @DisplayName("Should find an X-match")
+    void shouldFindXMatch() {
+        var textBlock = TextBlock.from("""
+                M_S_
+                _A__
+                M_S_
+                ____""");
+
+        var star = textBlock.star(1, 1);
+        boolean xmatch = star.xmatch("MAS");
+
+        assertThat(xmatch).isTrue();
+    }
+
+    @ParameterizedTest
+    @MethodSource("verifyDiameterMatch")
+    @DisplayName("Should verify diameter match")
+    void shouldVerifyDiameterMatch(Star.CardinalDirection tailTextDirection, boolean expectedMatch) {
+        var textBlock = TextBlock.from("""
+                M_S_
+                _A__
+                M_S_
+                ____""");
+
+        var star = textBlock.star(1, 1);
+        boolean diameterMatch = star.diameterMatch("MAS", tailTextDirection);
+
+        assertThat(diameterMatch).isEqualTo(expectedMatch);
+    }
+
+    static Stream<Arguments> verifyDiameterMatch() {
+        return Stream.of(
+                arguments(NORTH_EAST, true),
+                arguments(SOUTH_EAST, true),
+
+                arguments(NORTH, false),
+                arguments(EAST, false),
+                arguments(SOUTH, false),
+                arguments(SOUTH_WEST, false),
+                arguments(WEST, false),
+                arguments(NORTH_WEST, false)
+        );
+    }
+
+    @Test
+    @DisplayName("Should have single center crossing match")
+    void shouldHaveSingleCenterCrossingMatch() {
+        var textBlock = TextBlock.from("""
+                M__
+                _A_
+                __S""");
+
+        var star = textBlock.star(1, 1);
+        boolean diameterMatch = star.diameterMatch("MAS", SOUTH_EAST);
+
+        assertThat(diameterMatch).isTrue();
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideDiameterStrings")
+    @DisplayName("Should provide strings through star center")
+    void shouldProvideDiameterString(Star.CardinalDirection tailTextDirection, String expectedDiameterText) {
+        var textBlock = TextBlock.from("""
+                ABC
+                DEF
+                GHI""");
+
+        var star = textBlock.star(1, 1);
+        var diameter = 3;
+
+        String diameterText = star.diameterText(tailTextDirection, diameter);
+
+        assertThat(diameterText).isEqualTo(expectedDiameterText);
+    }
+
+    static Stream<Arguments> provideDiameterStrings() {
+        return Stream.of(
+                arguments(NORTH, "HEB"),
+                arguments(NORTH_EAST, "GEC"),
+                arguments(EAST, "DEF"),
+                arguments(SOUTH_EAST, "AEI"),
+                arguments(SOUTH, "BEH"),
+                arguments(SOUTH_WEST, "CEG"),
+                arguments(WEST, "FED"),
+                arguments(NORTH_WEST, "IEA")
+        );
+    }
+
+    @Test
+    @DisplayName("Should throw exception when text diameter is given as even number")
+    void shouldThrowExceptionWhenTextDiameterIsEven() {
+        var textBlock = TextBlock.from("""
+                ABC
+                DEF
+                GHI""");
+
+        var star = textBlock.star(1, 1);
+
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                        star.diameterText(SOUTH_EAST, 4))
+                .withMessage("Sorry mate, diameter needs to be uneven");
+    }
+
+    @Test
     @DisplayName("Should provide its rays")
     void shouldProvideItsRays() {
         var star = textBlock.star(2, 1);
