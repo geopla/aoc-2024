@@ -27,9 +27,19 @@ class TextBlockTest {
             MXMXAXMASX""";
 
     @Test
+    @DisplayName("")
+    void shouldCountSampleFromChallenge() {
+        var textBlock = TextBlock.from(inputSample);
+
+        long count = textBlock.rayCount("XMAS");
+
+        assertThat(count).isEqualTo(18);
+    }
+
+    @Test
     @DisplayName("Should find ONE string when present")
     void shouldFindOneString() {
-        var textBlock =TextBlock.from("""
+        var textBlock = TextBlock.from("""
                 _X____
                 __M___
                 ___A__
