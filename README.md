@@ -147,3 +147,8 @@ This is the very purpose of an `Optional` anyway.
 Actually the constraint won't have any impact on the planned solution finding 'XMAS' on the rays. But it will result
 into a slightly better performance because the one element rays are sorted out (round about 2 * lines + 2 * columns)
 
+## Day 5 Print Queue
+
+### Domain concepts
+**PageOrderRule** represents the `X|Y` ordering rule
+**Update** contains the page numbers to produce in an update
