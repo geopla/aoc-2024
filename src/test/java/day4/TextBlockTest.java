@@ -27,6 +27,16 @@ class TextBlockTest {
             MXMXAXMASX""";
 
     @Test
+    @DisplayName("")
+    void shouldCountXMatchesFromInputSample() {
+        var textBlock = TextBlock.from(inputSample);
+
+        long xmatchCount = textBlock.xmatchCount("MAS");
+
+        assertThat(xmatchCount).isEqualTo(9L);
+    }
+
+    @Test
     @DisplayName("Should count input from challenge")
     void shouldCountInputFromChallenge() {
         var resourceName = "../day-4-input.txt";
@@ -39,7 +49,7 @@ class TextBlockTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Should count sample from challenge")
     void shouldCountSampleFromChallenge() {
         var textBlock = TextBlock.from(inputSample);
 

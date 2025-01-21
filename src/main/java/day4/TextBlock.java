@@ -13,12 +13,6 @@ import java.util.stream.StreamSupport;
 
 class TextBlock {
 
-    public long rayCount(String text) {
-        return rays(text.length())
-                .filter(ray -> ray.value().equals(text))
-                .count();
-    }
-
     private final List<String> lines;
 
     private TextBlock(Stream<String> lines) {
@@ -31,6 +25,18 @@ class TextBlock {
 
     public static TextBlock from(String input) {
         return new TextBlock(input.lines());
+    }
+
+    public long xmatchCount(String mas) {
+        return stars()
+                .filter(star -> star.xmatch("MAS"))
+                .count();
+    }
+
+    public long rayCount(String text) {
+        return rays(text.length())
+                .filter(ray -> ray.value().equals(text))
+                .count();
     }
 
     public Stream<Ray> rays() {
@@ -56,8 +62,7 @@ class TextBlock {
                 if (hasCharAt(x + 1, y)) {
                     ++x;
                     return true;
-                }
-                else if (hasCharAt(0, y + 1)) {
+                } else if (hasCharAt(0, y + 1)) {
                     x = 0;
                     ++y;
                     return true;
