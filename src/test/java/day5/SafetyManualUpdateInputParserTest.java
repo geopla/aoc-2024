@@ -27,9 +27,9 @@ class SafetyManualUpdateInputParserTest {
                 "16,79,81,28,77,31,73,61,94,21,37,18,39,45,66"
         );
 
-        Stream<PrintJobData> parsePrintJobData = SafetyManualUpdateInputParser.parsePrintJobData(inputLines);
+        var printJob = SafetyManualUpdateInputParser.createPrintJob(inputLines);
 
-        assertThat(parsePrintJobData).isNotNull();
+        assertThat(printJob).isNotNull();
     }
 
     @Test
@@ -87,7 +87,7 @@ class SafetyManualUpdateInputParserTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Should read input from resource file")
     void shouldReadInputFromResourceFile() {
         var name = "../day-5-sample-input.txt";
         Stream<String> lines = SafetyManualUpdateInputParser.fromResource(name);

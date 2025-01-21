@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SafetyManualUpdateInputParser {
@@ -19,11 +19,11 @@ public class SafetyManualUpdateInputParser {
     static Pattern pageOrderRulePattern = Pattern.compile("^(?<forerunner>\\d+)\\|(?<successor>\\d+)$");
     static Pattern updatePattern = Pattern.compile("^\\d+(,\\d+)*$");
 
-
-    static Stream<PrintJobData> parsePrintJobData(Stream<String> lines) {
+    static Map<String, List<PrintJobData>> createPrintJob(Stream<String> lines) {
         return lines
                 .map(SafetyManualUpdateInputParser::printJobData)
-                .filter(Objects::nonNull);
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(PrintJobData::key));
     }
 
     static PrintJobData printJobData(String line) {

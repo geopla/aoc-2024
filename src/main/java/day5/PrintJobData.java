@@ -4,8 +4,20 @@ import java.util.List;
 
 sealed interface PrintJobData {
 
-    record PageOrderRule( int forerunner,
-                          int successor) implements PrintJobData { };
+    String key();
 
-    record Update(List<Integer> pageNumbers) implements PrintJobData { }
+    record PageOrderRule( int forerunner,
+                          int successor) implements PrintJobData {
+        @Override
+        public String key() {
+            return "page order rule";
+        }
+    };
+
+    record Update(List<Integer> pageNumbers) implements PrintJobData {
+        @Override
+        public String key() {
+            return "update";
+        }
+    }
 }
