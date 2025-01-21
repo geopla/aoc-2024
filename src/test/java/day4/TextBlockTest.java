@@ -28,6 +28,18 @@ class TextBlockTest {
 
     @Test
     @DisplayName("")
+    void shouldCountXMatchesFromChallenge() {
+        var resourceName = "../day-4-input.txt";
+        var input = TextBlock.class.getResourceAsStream(resourceName);
+        TextBlock textBlock = TextBlock.from(input);
+
+        long xmatchCount = textBlock.xmatchCount("MAS");
+
+        assertThat(xmatchCount).isEqualTo(1831L);
+    }
+
+    @Test
+    @DisplayName("")
     void shouldCountXMatchesFromInputSample() {
         var textBlock = TextBlock.from(inputSample);
 
