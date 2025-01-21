@@ -4,10 +4,10 @@ import java.util.List;
 
 public class SafetyManualUpdate {
 
-    private final List<PageOrderRule>  pageOrderRules;
-    private final List<Update> updates;
+    private final List<PrintJobData.PageOrderRule>  pageOrderRules;
+    private final List<PrintJobData.Update> updates;
 
-    public SafetyManualUpdate(List<PageOrderRule> pageOrderRules, List<Update> updates) {
+    public SafetyManualUpdate(List<PrintJobData.PageOrderRule> pageOrderRules, List<PrintJobData.Update> updates) {
         this.pageOrderRules = pageOrderRules;
         this.updates = updates;
     }
