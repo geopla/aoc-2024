@@ -1,4 +1,4 @@
-package day5;
+package day5.input;
 
 import java.io.BufferedReader;
 import java.io.IOException;
