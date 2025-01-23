@@ -19,6 +19,13 @@ public class SafetyManualUpdateInputParser {
     static Pattern pageOrderRulePattern = Pattern.compile("^(?<forerunner>\\d+)\\|(?<successor>\\d+)$");
     static Pattern updatePattern = Pattern.compile("^\\d+(,\\d+)*$");
 
+    public static Stream<PrintJobData> read(Stream<String> lines) {
+        return lines
+                .map(SafetyManualUpdateInputParser::printJobData)
+                .filter(Objects::nonNull);
+    }
+
+    @Deprecated
     static Map<String, List<PrintJobData>> createPrintJob(Stream<String> lines) {
         return lines
                 .map(SafetyManualUpdateInputParser::printJobData)

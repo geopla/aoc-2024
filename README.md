@@ -152,3 +152,7 @@ into a slightly better performance because the one element rays are sorted out (
 ### Domain concepts
 **PageOrderRule** represents the `X|Y` ordering rule
 **Update** contains the page numbers to produce in an update
+
+### Technical challenge
+There is only a single input source providing different types when parsing. Modelling that with a sealed interface seems
+reasonable. But when using that interface type in collections, type safety errors or problems will pop out of nowhere.
