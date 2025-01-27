@@ -18,11 +18,13 @@ class SafetyManualUpdateTest {
     }
 
     @Test
-    @DisplayName("Should create print job")
-    void shouldCreatePrintJob() {
-        safetyManualUpdate.printJobFromInput("day-5-example-input.txt");
+    @DisplayName("Should accumulate middle page numbers of challenge input")
+    void shouldAccumulateMiddlePageNumberOfInput() {
+        safetyManualUpdate.printJobFromInput("day-5-input.txt");
 
-        assertThat(safetyManualUpdate.printJob()).isNotNull();
+        int middlePageNumberSum = safetyManualUpdate.middlePageNumberSumOfValidUpdates();
+
+        assertThat(middlePageNumberSum).isEqualTo(5651);
     }
 
     @Test
@@ -47,5 +49,13 @@ class SafetyManualUpdateTest {
         int middlePageNumberSum = safetyManualUpdate.middlePageNumberSumOfValidUpdates();
 
         assertThat(middlePageNumberSum).isEqualTo(143);
+    }
+
+    @Test
+    @DisplayName("Should create print job")
+    void shouldCreatePrintJob() {
+        safetyManualUpdate.printJobFromInput("day-5-example-input.txt");
+
+        assertThat(safetyManualUpdate.printJob()).isNotNull();
     }
 }

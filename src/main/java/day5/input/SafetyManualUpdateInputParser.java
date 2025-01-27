@@ -5,13 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SafetyManualUpdateInputParser {
@@ -51,14 +48,6 @@ public class SafetyManualUpdateInputParser {
         return new BufferedReader(new InputStreamReader(inputStream));
     }
 
-    @Deprecated
-    static Map<String, List<PrintJobData>> createPrintJob(Stream<String> lines) {
-        return lines
-                .map(SafetyManualUpdateInputParser::printJobData)
-                .filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(PrintJobData::key));
-    }
-
     static PrintJobData printJobData(String line) {
         if (isPageOrderRule(line)) {
             return createPageOrderRule(line);
@@ -79,7 +68,9 @@ public class SafetyManualUpdateInputParser {
 
     static PrintJobData.PageOrderRule createPageOrderRule(String line) {
         Matcher matcher = pageOrderRulePattern.matcher(line);
-        matcher.find();
+        matcher.matches();
+
+        // ignoring not matching input for now ...
 
         var forerunner = Integer.parseInt(matcher.group("forerunner"));
         var successor = Integer.parseInt(matcher.group("successor"));
