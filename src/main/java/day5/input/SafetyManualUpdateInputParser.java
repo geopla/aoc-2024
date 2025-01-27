@@ -19,10 +19,36 @@ public class SafetyManualUpdateInputParser {
     static Pattern pageOrderRulePattern = Pattern.compile("^(?<forerunner>\\d+)\\|(?<successor>\\d+)$");
     static Pattern updatePattern = Pattern.compile("^\\d+(,\\d+)*$");
 
+    public static Stream<PrintJobData> readFromResource(String name) {
+        return read(fromResource(name));
+    }
+
     public static Stream<PrintJobData> read(Stream<String> lines) {
         return lines
                 .map(SafetyManualUpdateInputParser::printJobData)
                 .filter(Objects::nonNull);
+    }
+
+    public static Stream<String> fromResource(String name) {
+        final var reader = bufferedReader(name);
+
+        return reader.lines().onClose(() -> {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
+    }
+
+    private static BufferedReader bufferedReader(String name) {
+        InputStream inputStream = SafetyManualUpdateInputParser.class.getResourceAsStream(name);
+
+        if (inputStream == null) {
+            throw new IllegalArgumentException("no such file %s".formatted(name));
+        }
+
+        return new BufferedReader(new InputStreamReader(inputStream));
     }
 
     @Deprecated
@@ -69,18 +95,5 @@ public class SafetyManualUpdateInputParser {
     static boolean isUpdate(String input) {
         Matcher matcher = updatePattern.matcher(input.trim());
         return matcher.matches();
-    }
-
-    static Stream<String> fromResource(String name) {
-        InputStream sampleInput = SafetyManualUpdateInputParser.class.getResourceAsStream(name);
-        var reader = new BufferedReader(new InputStreamReader(sampleInput));
-
-        return reader.lines().onClose(() -> {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
     }
 }

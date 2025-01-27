@@ -22,7 +22,8 @@ class PageOrderingRules implements Predicate<Update> {
 
     @Override
     public boolean test(Update update) {
-        return false;
+        return orderRuleByForerunner.keySet().stream()
+                .allMatch(forerunner -> testOrderRuleBy(forerunner, update));
     }
 
     boolean testOrderRuleBy(int forerunner, Update update) {
@@ -46,5 +47,14 @@ class PageOrderingRules implements Predicate<Update> {
 
     boolean hasOrderingRule(Integer pageNumber) {
         return orderRuleByForerunner.containsKey(pageNumber);
+    }
+
+    public static class SafetyManualUpdate {
+
+        private final PrintJob printJob;
+
+        public SafetyManualUpdate(PrintJob printJob) {
+            this.printJob = printJob;
+        }
     }
 }

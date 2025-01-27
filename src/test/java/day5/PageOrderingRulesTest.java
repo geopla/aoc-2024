@@ -18,15 +18,6 @@ class PageOrderingRulesTest {
 
     static PageOrderingRules examplePageOrderingRules;
 
-    // right order
-    // true   75, 47, 61, 53, 29
-    // true   97, 61, 53, 29, 13
-    // true   75, 29, 13
-    //
-    // false  75, 97, 47, 61, 53
-    // false  61, 13, 29
-    // false  97, 13, 75, 29, 47
-
     @BeforeAll
     static void beforeAll() {
         examplePageOrderingRules = new PageOrderingRules(Stream.of(
@@ -62,7 +53,13 @@ class PageOrderingRulesTest {
 
     static Stream<Arguments> validateUpdate() {
         return Stream.of(
-                arguments(new Update(75, 47, 61, 53, 29), true)
+                arguments(new Update(75, 47, 61, 53, 29), true),
+                arguments(new Update(97, 61, 53, 29, 13), true),
+                arguments(new Update(75, 29, 13), true),
+
+                arguments(new Update(75, 97, 47, 61, 53), false),
+                arguments(new Update(61, 13, 29), false),
+                arguments(new Update(97, 13, 75, 29, 47), false)
         );
     }
 
