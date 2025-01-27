@@ -7,14 +7,55 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class UpdateTest {
 
+
+    @ParameterizedTest
+    @MethodSource("createUpdateWithMovedPage")
+    @DisplayName("Should create new update with moved element")
+    void shouldCreateUpdateWithMovedElement(int page, int index, Update expectedUpdate) {
+        var update = new Update(97, 13, 75, 29, 47);
+
+        var actualUpdate = update.createUpdateWithMovedPage(page, index);
+
+        assertThat(actualUpdate).isEqualTo(expectedUpdate);
+    }
+
+    static Stream<Arguments> createUpdateWithMovedPage() {
+        return Stream.of(
+                arguments(75, 1, new Update(97, 75, 13, 29, 47)),
+                arguments(97, 2, new Update(13, 75, 97, 29, 47)),
+                arguments(29, 0, new Update(29, 97, 13, 75, 47)),
+                arguments(97, 0, new Update(97, 13, 75, 29, 47)),
+                arguments(47, 4, new Update(97, 13, 75, 29, 47)),
+                // Element not present should not cause any havoc
+                arguments(2007, 1, new Update(97, 13, 75, 29, 47))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("findIndexOfFirstOccurrenceOutOfPageNumbers")
+    @DisplayName("Should find index of first occurrence out of given page numbers")
+    void shouldFindIndexOfFirstOccurrenceOutOfPageNumbers(Set<Integer> pageNumberSubset, int expectedIndex) {
+        var update = new Update(97, 13, 75, 29, 47);
+
+        int firstOccurrence = update.indexOfFirstOccurrenceOutOf(pageNumberSubset);
+
+        assertThat(firstOccurrence).isEqualTo(expectedIndex);
+    }
+
+    static Stream<Arguments> findIndexOfFirstOccurrenceOutOfPageNumbers() {
+        return Stream.of(
+                // TODO add some more cases
+                arguments(Set.of(75, 47), 2)
+        );
+    }
 
     @ParameterizedTest
     @MethodSource("providePageNumbersBeforePage")
