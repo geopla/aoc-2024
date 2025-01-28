@@ -4,10 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -15,34 +15,68 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class UpdateTest {
 
-
-    @ParameterizedTest
-    @MethodSource("createUpdateWithMovedPage")
-    @DisplayName("Should create new update with moved element")
-    void shouldCreateUpdateWithMovedElement(int page, int index, Update expectedUpdate) {
+    @Test
+    @DisplayName("Should provide first page (update is assumed to be non empty")
+    void shouldReturnFirstPage() {
         var update = new Update(97, 13, 75, 29, 47);
 
-        var actualUpdate = update.createUpdateWithMovedPage(page, index);
+        assertThat(update.firstPage().get()).isEqualTo(97);
+    }
+
+    @Test
+    @DisplayName("Should NOT have a first page at all when update is empty")
+    void shouldNotHaveFirstPageWhenUpdateIsEmpty() {
+        var update = new Update(List.of());
+
+        assertThat(update.firstPage()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "97, 13",
+            "75, 29",
+            "29, 47",
+            "47, -1",
+            "2007, -1"
+    })
+    @DisplayName("Should return next page of given one")
+    void shouldReturnNextPage(Integer page, Integer expectedNextPage) {
+        var update = new Update(97, 13, 75, 29, 47);
+
+        Integer actualNextPage = update.nextPage(page).orElse(-1);
+
+        assertThat(actualNextPage).isEqualTo(expectedNextPage);
+    }
+
+    @ParameterizedTest
+    @MethodSource("createUpdateWithPageMovedBeforeItsSuccessors")
+    @DisplayName("Should create an update with given page moved before its successors")
+    void shouldCreateUpdateWithPageMovedBeforeItsSuccessors(Integer page, List<Integer> successors, Update expectedUpdate) {
+        var update = new Update(97, 13, 75, 29, 47);
+
+        var actualUpdate = update.createUpdateWithPageMovedBeforeSuccessors(page, successors);
 
         assertThat(actualUpdate).isEqualTo(expectedUpdate);
     }
 
-    static Stream<Arguments> createUpdateWithMovedPage() {
+    static Stream<Arguments> createUpdateWithPageMovedBeforeItsSuccessors() {
         return Stream.of(
-                arguments(75, 1, new Update(97, 75, 13, 29, 47)),
-                arguments(97, 2, new Update(13, 75, 97, 29, 47)),
-                arguments(29, 0, new Update(29, 97, 13, 75, 47)),
-                arguments(97, 0, new Update(97, 13, 75, 29, 47)),
-                arguments(47, 4, new Update(97, 13, 75, 29, 47)),
+                arguments(75, List.of(29, 13), new Update(97, 75, 13, 29, 47)),
+                arguments(29, List.of(97, 75), new Update(29, 97, 13, 75, 47)),
+
+                arguments(97, List.of(), new Update(97, 13, 75, 29, 47)),
+                arguments(47, List.of(), new Update(97, 13, 75, 29, 47)),
+                arguments(75, List.of(), new Update(97, 13, 75, 29, 47)),
+
                 // Element not present should not cause any havoc
-                arguments(2007, 1, new Update(97, 13, 75, 29, 47))
+                arguments(2007, List.of(97, 75, 13), new Update(97, 13, 75, 29, 47))
         );
     }
 
     @ParameterizedTest
     @MethodSource("findIndexOfFirstOccurrenceOutOfPageNumbers")
     @DisplayName("Should find index of first occurrence out of given page numbers")
-    void shouldFindIndexOfFirstOccurrenceOutOfPageNumbers(Set<Integer> pageNumberSubset, int expectedIndex) {
+    void shouldFindIndexOfFirstOccurrenceOutOfPageNumbers(List<Integer> pageNumberSubset, int expectedIndex) {
         var update = new Update(97, 13, 75, 29, 47);
 
         int firstOccurrence = update.indexOfFirstOccurrenceOutOf(pageNumberSubset);
@@ -52,8 +86,10 @@ class UpdateTest {
 
     static Stream<Arguments> findIndexOfFirstOccurrenceOutOfPageNumbers() {
         return Stream.of(
-                // TODO add some more cases
-                arguments(Set.of(75, 47), 2)
+                arguments(List.of(75, 47), 2),
+                arguments(List.of(13, 97), 0),
+                arguments(List.of(47), 4),
+                arguments(List.of(47, 29), 3)
         );
     }
 

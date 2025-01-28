@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.FieldSource;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -223,9 +223,9 @@ class ReportTest {
 
         var actualSkippedNthLevels = dampenerLevels
                 .map(intStream -> intStream.boxed().toList())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
-        var expectedSkippedNthLevels = Set.of(
+        var expectedSkippedNthLevels = List.of(
                 List.of(2, 3),
                 List.of(1, 3),
                 List.of(1, 2)

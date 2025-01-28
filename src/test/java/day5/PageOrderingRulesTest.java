@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class PageOrderingRulesTest {
@@ -60,6 +61,21 @@ class PageOrderingRulesTest {
                 arguments(new Update(75, 97, 47, 61, 53), false),
                 arguments(new Update(61, 13, 29), false),
                 arguments(new Update(97, 13, 75, 29, 47), false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("reorderUpdate")
+    @DisplayName("Should reorder an update according to the rules")
+    void shouldReorderUpdate(Update invalidUpdate, Update expectedUpdate) {
+        assertThat(examplePageOrderingRules.reorder(invalidUpdate)).isEqualTo(expectedUpdate);
+    }
+
+    static Stream<Arguments> reorderUpdate() {
+        return Stream.of(
+            arguments(new Update(75, 97, 47, 61, 53), new Update(97, 75, 47, 61, 53)),
+            arguments(new Update(61, 13, 29), new Update(61, 29, 13)),
+            arguments(new Update(97, 13, 75, 29, 47), new Update(97, 75, 47, 29, 13))
         );
     }
 
@@ -141,6 +157,7 @@ class PageOrderingRulesTest {
 
         assertThat(pageOrderingRules.successorsOf(35)).containsExactlyInAnyOrder(97, 72);
         assertThat(pageOrderingRules.successorsOf(96)).containsExactly(93);
+        assertThat(pageOrderingRules.successorsOf(13)).isEmpty();
     }
 
     @ParameterizedTest

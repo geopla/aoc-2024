@@ -5,6 +5,7 @@ import day5.input.PrintJobData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,6 +27,26 @@ class PageOrderingRules implements Predicate<Update> {
                 .allMatch(forerunner -> testOrderRuleBy(forerunner, update));
     }
 
+    public Update reorder(Update update) {
+
+        // TRADEOFF Due to possible memory or runtime penalties because of unknown size of updates a more
+        // elegant recursive implementation is not implemented here.
+
+        Optional<Integer> currentPage = update.firstPage();
+        Update currentUpdate = update;
+
+        while (currentPage.isPresent()) {
+            var page = currentPage.get();
+            var successorsButPrintedBefore = successorsButPrintedBefore(page, currentUpdate);
+
+            currentUpdate = currentUpdate.createUpdateWithPageMovedBeforeSuccessors(page, successorsButPrintedBefore);
+
+            currentPage = currentUpdate.nextPage(page);
+        }
+
+        return currentUpdate;
+    }
+
     boolean testOrderRuleBy(int forerunner, Update update) {
         var successorsButPrintedBefore = successorsButPrintedBefore(forerunner, update);
 
@@ -42,19 +63,16 @@ class PageOrderingRules implements Predicate<Update> {
     }
 
     List<Integer> successorsOf(Integer pageNumber) {
-        return new ArrayList<>(orderRuleByForerunner.get(pageNumber));
+        if (orderRuleByForerunner.containsKey(pageNumber)) {
+            return new ArrayList<>(orderRuleByForerunner.get(pageNumber));
+        }
+        else {
+            return new ArrayList<>();
+        }
     }
 
     boolean hasOrderingRule(Integer pageNumber) {
         return orderRuleByForerunner.containsKey(pageNumber);
     }
 
-    public static class SafetyManualUpdate {
-
-        private final PrintJob printJob;
-
-        public SafetyManualUpdate(PrintJob printJob) {
-            this.printJob = printJob;
-        }
-    }
 }
