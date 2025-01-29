@@ -3,9 +3,7 @@ package day5;
 import day5.input.PrintJobData;
 import day5.input.SafetyManualUpdateInputParser;
 
-import javax.swing.*;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SafetyManualUpdate {
@@ -21,7 +19,7 @@ public class SafetyManualUpdate {
                 .sum();
     }
 
-    public int middlePageNumberSumOfInvalidUpdates() {
+    public int middlePageNumberSumOfReorderedUpdates() {
         return printJob.updates()
                 .filter(update -> ! printJob.pageOrderingRules().test(update))
                 .map(update -> printJob.pageOrderingRules().reorder(update))
