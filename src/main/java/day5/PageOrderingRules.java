@@ -30,7 +30,7 @@ class PageOrderingRules implements Predicate<Update> {
     public Update reorder(Update update) {
 
         // TRADEOFF Due to possible memory or runtime penalties because of unknown size of updates a more
-        // elegant recursive implementation is not implemented here.
+        // elegant recursive solution is not implemented here.
 
         Optional<Integer> currentPage = update.firstPage();
         Update currentUpdate = update;

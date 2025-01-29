@@ -52,6 +52,30 @@ class SafetyManualUpdateTest {
     }
 
     @Test
+    @DisplayName("Should provide INVALID updates of example input")
+    void shouldProvideInvalidUpdatesOfExampleInput() {
+        safetyManualUpdate.printJobFromInput("day-5-example-input.txt");
+
+        Stream<Update> validUpdates = safetyManualUpdate.invalidUpdates();
+
+        assertThat(validUpdates).containsExactlyInAnyOrder(
+                new Update(75, 97, 47, 61, 53),
+                new Update(61, 13, 29),
+                new Update(97, 13, 75, 29, 47)
+        );
+    }
+
+    @Test
+    @DisplayName("Should accumulate middle page number for INVALID updates from example input")
+    void shouldAccumulateMiddlePageNumbersOfInvalidUpdatesFromExampleInput() {
+        safetyManualUpdate.printJobFromInput("day-5-example-input.txt");
+
+        int middlePageNumberSum = safetyManualUpdate.middlePageNumberSumOfInvalidUpdates();
+
+        assertThat(middlePageNumberSum).isEqualTo(123);
+    }
+
+    @Test
     @DisplayName("Should create print job")
     void shouldCreatePrintJob() {
         safetyManualUpdate.printJobFromInput("day-5-example-input.txt");

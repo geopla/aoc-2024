@@ -13,25 +13,39 @@ public class SafetyManualUpdate {
     private PrintJob printJob;
 
 
-    public void printJobFromInput(String name) {
-        List<PrintJobData> printJobData = SafetyManualUpdateInputParser.readFromResource(name).toList();
-        printJob = new PrintJob(printJobData);
-    }
-
-    public Stream<Update> validUpdates() {
-        return printJob.updates()
-                .filter(update -> printJob.pageOrderingRules().test(update));
-    }
-
     public int middlePageNumberSumOfValidUpdates() {
         return printJob.updates()
                 .filter(update -> printJob.pageOrderingRules().test(update))
-                .map(update -> update.middlePageNumber())
+                .map(Update::middlePageNumber)
                 .mapToInt(Integer::intValue)
                 .sum();
     }
 
-    public PrintJob printJob() {
+    public int middlePageNumberSumOfInvalidUpdates() {
+        return printJob.updates()
+                .filter(update -> ! printJob.pageOrderingRules().test(update))
+                .map(update -> printJob.pageOrderingRules().reorder(update))
+                .map(Update::middlePageNumber)
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
+    void printJobFromInput(String name) {
+        List<PrintJobData> printJobData = SafetyManualUpdateInputParser.readFromResource(name).toList();
+        printJob = new PrintJob(printJobData);
+    }
+
+     Stream<Update> validUpdates() {
+        return printJob.updates()
+                .filter(update -> printJob.pageOrderingRules().test(update));
+    }
+
+    public Stream<Update> invalidUpdates() {
+        return printJob.updates()
+                .filter(update -> ! printJob.pageOrderingRules().test(update));
+    }
+
+    PrintJob printJob() {
         return printJob;
     }
 }
