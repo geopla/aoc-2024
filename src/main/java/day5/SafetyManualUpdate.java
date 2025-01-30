@@ -10,6 +10,12 @@ public class SafetyManualUpdate {
 
     private PrintJob printJob;
 
+    // TODO not a smart way to get the construction done, but it does the job for now
+
+    public void printJobFromInput(String name) {
+        List<PrintJobData> printJobData = SafetyManualUpdateInputParser.readFromResource(name).toList();
+        printJob = new PrintJob(printJobData);
+    }
 
     public int middlePageNumberSumOfValidUpdates() {
         return printJob.updates()
@@ -26,11 +32,6 @@ public class SafetyManualUpdate {
                 .map(Update::middlePageNumber)
                 .mapToInt(Integer::intValue)
                 .sum();
-    }
-
-    void printJobFromInput(String name) {
-        List<PrintJobData> printJobData = SafetyManualUpdateInputParser.readFromResource(name).toList();
-        printJob = new PrintJob(printJobData);
     }
 
      Stream<Update> validUpdates() {

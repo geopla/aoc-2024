@@ -17,7 +17,7 @@ Lessons learned
 - streams can be reused with some effort
 
 ## Day 3 - Mull It Over
-Lessions learned
+Lessons learned
 - good ol' state machine as consumer to the rescue
 - spliterators are fun
 - stick to TDD
@@ -156,3 +156,39 @@ into a slightly better performance because the one element rays are sorted out (
 ### Technical challenge
 There is only a single input source providing different types when parsing. Modelling that with a sealed interface seems
 reasonable. But when using that interface type in collections, type safety errors or problems will pop out of nowhere.
+
+## Lessons learned
+- clearly separate abstraction layers (example Update handles index related operations itself)
+
+## Day 6 Guard Gullivant
+
+### Domain Language and Concepts
+- **Guard:** patrols a lab (back in year 1518)
+- **Laboratory:**  a room the guard patrols
+- **Patrol Protocol:** Rules of movement - might be dependent on the current year?
+- **Obstruction:** changes the direction of the guards movement  
+- **Position:** Position of guard or obstacles, cartesian coordinates
+- **Coordinates**: expressed as tupel `(x, y)`; direction from left to right (x) and top to bottom (y)
+- **Direction:** cardinal direction, north, east, south, west; iteration order clockwise
+- **Walk:** a path consisting of a sequence of legs, a guard takes
+- **Leg:** a straight part of walk, having a length given in steps
+- **Step:** a position change
+
+### The problems to solve
+
+### Movement of the guard
+- steps into a direction
+  - number of steps into one direction might be limited 
+- direction modeled as cardinal points gives us the opportunity to extend to diagonal moves too
+- rule(s) how to handle an obstacle
+  - might depend on the obstacles type
+  - might depend on the year (back in time) too?
+- leaving the room
+  - not sure but it should happen when reaching labs border
+- number of **distinct** locations visited
+  - does the starting location count too?
+  - recording the steps will do
+
+## Laboratory
+- rectangular, dimension?
+- obstacles are quite sparse
