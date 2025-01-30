@@ -20,8 +20,6 @@ class Room {
 
     record Obstruction(char type, Position position) { }
 
-    record Guard(char facing, Position position) { }
-
     private Size size;
 
     private List<Obstruction> obstructions = new ArrayList<>();
@@ -44,6 +42,8 @@ class Room {
     }
 
     private void initializeFrom(Reader input) {
+        Room thisRoom = this;
+
         Map.codePoints(input).forEach(new IntConsumer() {
             @Override
             public void accept(int codePoint) {
@@ -56,7 +56,7 @@ class Room {
                     ++currentX;
                 }
                 else if (isGuard(codePoint)) {
-                    guards.add(new Guard((char) codePoint, new Position(currentX, length)));
+                    guards.add(new Guard(thisRoom, new Position(currentX, length), (char) codePoint));
                     ++currentX;
                 }
                 else {

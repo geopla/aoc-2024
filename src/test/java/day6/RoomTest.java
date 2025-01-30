@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class RoomTest {
 
@@ -45,16 +46,18 @@ class RoomTest {
     @Test
     @DisplayName("Should have guard(s) - only one for now")
     void shouldHaveGuards() {
-        var roomMap = """
+        var room = new Room(from("""
                 #....
                 .#..#
                 ^...#
-                """;
+                """));
 
-        var room = new Room(from(roomMap));
+        var guard = room.guards().getFirst();
 
-        assertThat(room.guards()).containsExactly(
-              new Room.Guard('^', new Room.Position(0, 2))
+        assertAll("guard",
+                () -> assertThat(guard.room()).isEqualTo(room),
+                () -> assertThat(guard.startPosition()).isEqualTo(new Room.Position(0, 2)),
+                () -> assertThat(guard.startFacing()).isEqualTo(CardinalDirection.NORTH)
         );
     }
 
