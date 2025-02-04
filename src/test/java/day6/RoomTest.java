@@ -1,5 +1,6 @@
 package day6;
 
+import day6.Lifecycle.Computed;
 import day6.Room.Position;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class RoomTest {
     @ParameterizedTest
     @MethodSource("realizePlannedLegInEmptyRoom")
     @DisplayName("Should realize guards planned leg in room without any obstructions")
-    void shouldRealizePlannedLegInEmptyRoom(LegPlanned legPlanned, Leg expectedLeg) {
+    void shouldRealizePlannedLegInEmptyRoom(LegPlanned legPlanned, Leg<Computed> expectedLeg) {
         var room = Room.from("""
                 ......
                 ..^...
@@ -36,17 +37,17 @@ class RoomTest {
         var start = new Position(2,1);
 
         return Stream.of(
-                arguments(new LegPlanned(start, NORTH), new Leg(start, NORTH, 1, BORDER)),
-                arguments(new LegPlanned(start, EAST),  new Leg(start, EAST,  3, BORDER)),
-                arguments(new LegPlanned(start, SOUTH), new Leg(start, SOUTH, 3, BORDER)),
-                arguments(new LegPlanned(start, WEST),  new Leg(start, WEST,  2, BORDER))
+                arguments(new LegPlanned(start, NORTH), new Leg<>(start, NORTH, new Computed(1, BORDER))),
+                arguments(new LegPlanned(start, EAST),  new Leg<>(start, EAST,  new Computed(3, BORDER))),
+                arguments(new LegPlanned(start, SOUTH), new Leg<>(start, SOUTH, new Computed(3, BORDER))),
+                arguments(new LegPlanned(start, WEST),  new Leg<>(start, WEST,  new Computed(2, BORDER)))
         );
     }
 
     @ParameterizedTest
     @MethodSource("realizePlannedLegInObstructedRoom")
     @DisplayName("Should realize guards planned leg in room with obstructions")
-    void shouldRealizePlannedLegInObstructedRoom(LegPlanned legPlanned, Leg expectedLeg) {
+    void shouldRealizePlannedLegInObstructedRoom(LegPlanned legPlanned, Leg<Computed> expectedLeg) {
         var room = Room.from("""
                 ..#...
                 #.^..#
@@ -61,17 +62,17 @@ class RoomTest {
         var start = new Position(2,1);
 
         return Stream.of(
-                arguments(new LegPlanned(start, NORTH), new Leg(start, NORTH, 0, OBSTRUCTION)),
-                arguments(new LegPlanned(start, EAST),  new Leg(start, EAST,  2, OBSTRUCTION)),
-                arguments(new LegPlanned(start, SOUTH), new Leg(start, SOUTH, 1, OBSTRUCTION)),
-                arguments(new LegPlanned(start, WEST),  new Leg(start, WEST,  1, OBSTRUCTION))
+                arguments(new LegPlanned(start, NORTH), new Leg<>(start, NORTH, new Computed(0, OBSTRUCTION))),
+                arguments(new LegPlanned(start, EAST),  new Leg<>(start, EAST,  new Computed(2, OBSTRUCTION))),
+                arguments(new LegPlanned(start, SOUTH), new Leg<>(start, SOUTH, new Computed(1, OBSTRUCTION))),
+                arguments(new LegPlanned(start, WEST),  new Leg<>(start, WEST,  new Computed(1, OBSTRUCTION)))
         );
     }
 
     @ParameterizedTest
     @MethodSource("computeAvailableStepsToTheNorth")
     @DisplayName("Should compute available steps to the north")
-    void shouldComputeAvailableStepsToTheNorth(LegPlanned legPlanned, Leg expectedLeg) {
+    void shouldComputeAvailableStepsToTheNorth(LegPlanned legPlanned, Leg<Computed> expectedLeg) {
         var room = Room.from("""
                 .###
                 ..##
@@ -83,17 +84,17 @@ class RoomTest {
 
     static Stream<Arguments> computeAvailableStepsToTheNorth() {
         return Stream.of(
-                arguments(new LegPlanned(new Position(0, 3), NORTH), new Leg(new Position(0, 3), NORTH, 3, BORDER)),
-                arguments(new LegPlanned(new Position(1, 3), NORTH), new Leg(new Position(1, 3), NORTH, 2, OBSTRUCTION)),
-                arguments(new LegPlanned(new Position(2, 3), NORTH), new Leg(new Position(2, 3), NORTH, 1, OBSTRUCTION)),
-                arguments(new LegPlanned(new Position(3, 3), NORTH), new Leg(new Position(3, 3), NORTH, 0, OBSTRUCTION))
+                arguments(new LegPlanned(new Position(0, 3), NORTH), new Leg<>(new Position(0, 3), NORTH, new Computed(3, BORDER))),
+                arguments(new LegPlanned(new Position(1, 3), NORTH), new Leg<>(new Position(1, 3), NORTH, new Computed(2, OBSTRUCTION))),
+                arguments(new LegPlanned(new Position(2, 3), NORTH), new Leg<>(new Position(2, 3), NORTH, new Computed(1, OBSTRUCTION))),
+                arguments(new LegPlanned(new Position(3, 3), NORTH), new Leg<>(new Position(3, 3), NORTH, new Computed(0, OBSTRUCTION)))
         );
     }
 
     @ParameterizedTest
     @MethodSource("computeAvailableStepsToTheEast")
     @DisplayName("Should compute available steps to the east")
-    void shouldComputeAvailableStepsToTheEast(LegPlanned legPlanned, Leg expectedLeg) {
+    void shouldComputeAvailableStepsToTheEast(LegPlanned legPlanned, Leg<Computed> expectedLeg) {
         var room = Room.from("""
                 >...
                 >..#
@@ -105,17 +106,17 @@ class RoomTest {
 
     static Stream<Arguments> computeAvailableStepsToTheEast() {
         return Stream.of(
-                arguments(new LegPlanned(new Position(0, 0), EAST), new Leg(new Position(0, 0), EAST, 3, BORDER)),
-                arguments(new LegPlanned(new Position(0, 1), EAST), new Leg(new Position(0, 1), EAST, 2, OBSTRUCTION)),
-                arguments(new LegPlanned(new Position(0, 2), EAST), new Leg(new Position(0, 2), EAST, 1, OBSTRUCTION)),
-                arguments(new LegPlanned(new Position(0, 3), EAST), new Leg(new Position(0, 3), EAST, 0, OBSTRUCTION))
+                arguments(new LegPlanned(new Position(0, 0), EAST), new Leg<>(new Position(0, 0), EAST, new Computed(3, BORDER))),
+                arguments(new LegPlanned(new Position(0, 1), EAST), new Leg<>(new Position(0, 1), EAST, new Computed(2, OBSTRUCTION))),
+                arguments(new LegPlanned(new Position(0, 2), EAST), new Leg<>(new Position(0, 2), EAST, new Computed(1, OBSTRUCTION))),
+                arguments(new LegPlanned(new Position(0, 3), EAST), new Leg<>(new Position(0, 3), EAST, new Computed(0, OBSTRUCTION)))
         );
     }
 
     @ParameterizedTest
     @MethodSource("computeAvailableStepsToTheSouth")
     @DisplayName("Should compute available steps to the south")
-    void shouldComputeAvailableStepsToTheSouth(LegPlanned legPlanned, Leg expectedLeg) {
+    void shouldComputeAvailableStepsToTheSouth(LegPlanned legPlanned, Leg<Computed> expectedLeg) {
         var room = Room.from("""
                 vvvv
                 ...#
@@ -127,17 +128,17 @@ class RoomTest {
 
     static Stream<Arguments> computeAvailableStepsToTheSouth() {
         return Stream.of(
-                arguments(new LegPlanned(new Position(0, 0), SOUTH), new Leg(new Position(0, 0), SOUTH, 3, BORDER)),
-                arguments(new LegPlanned(new Position(1, 0), SOUTH), new Leg(new Position(1, 0), SOUTH, 2, OBSTRUCTION)),
-                arguments(new LegPlanned(new Position(2, 0), SOUTH), new Leg(new Position(2, 0), SOUTH, 1, OBSTRUCTION)),
-                arguments(new LegPlanned(new Position(3, 0), SOUTH), new Leg(new Position(3, 0), SOUTH, 0, OBSTRUCTION))
+                arguments(new LegPlanned(new Position(0, 0), SOUTH), new Leg<>(new Position(0, 0), SOUTH, new Computed(3, BORDER))),
+                arguments(new LegPlanned(new Position(1, 0), SOUTH), new Leg<>(new Position(1, 0), SOUTH, new Computed(2, OBSTRUCTION))),
+                arguments(new LegPlanned(new Position(2, 0), SOUTH), new Leg<>(new Position(2, 0), SOUTH, new Computed(1, OBSTRUCTION))),
+                arguments(new LegPlanned(new Position(3, 0), SOUTH), new Leg<>(new Position(3, 0), SOUTH, new Computed(0, OBSTRUCTION)))
         );
     }
 
     @ParameterizedTest
     @MethodSource("computeAvailableStepsToTheWest")
     @DisplayName("Should compute available steps to the west")
-    void shouldComputeAvailableStepsToTheWest(LegPlanned legPlanned, Leg expectedLeg) {
+    void shouldComputeAvailableStepsToTheWest(LegPlanned legPlanned, Leg<Computed> expectedLeg) {
         var room = Room.from("""
                 ...<
                 #..<
@@ -149,10 +150,10 @@ class RoomTest {
 
     static Stream<Arguments> computeAvailableStepsToTheWest() {
         return Stream.of(
-                arguments(new LegPlanned(new Position(3, 0), WEST), new Leg(new Position(3, 0), WEST, 3, BORDER)),
-                arguments(new LegPlanned(new Position(3, 1), WEST), new Leg(new Position(3, 1), WEST, 2, OBSTRUCTION)),
-                arguments(new LegPlanned(new Position(3, 2), WEST), new Leg(new Position(3, 2), WEST, 1, OBSTRUCTION)),
-                arguments(new LegPlanned(new Position(3, 3), WEST), new Leg(new Position(3, 3), WEST, 0, OBSTRUCTION))
+                arguments(new LegPlanned(new Position(3, 0), WEST), new Leg<>(new Position(3, 0), WEST, new Computed(3, BORDER))),
+                arguments(new LegPlanned(new Position(3, 1), WEST), new Leg<>(new Position(3, 1), WEST, new Computed(2, OBSTRUCTION))),
+                arguments(new LegPlanned(new Position(3, 2), WEST), new Leg<>(new Position(3, 2), WEST, new Computed(1, OBSTRUCTION))),
+                arguments(new LegPlanned(new Position(3, 3), WEST), new Leg<>(new Position(3, 3), WEST, new Computed(0, OBSTRUCTION)))
         );
     }
 

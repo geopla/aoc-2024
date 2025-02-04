@@ -1,8 +1,7 @@
 package day6;
 
-public record Leg(
+public record Leg<Computed extends Lifecycle>(
         Room.Position start,
         CardinalDirection direction,
-        int steps,
-        Terminator terminator) {
+        Computed computed) {
 }

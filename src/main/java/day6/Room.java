@@ -1,5 +1,7 @@
 package day6;
 
+import day6.Lifecycle.Computed;
+
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ class Room {
         initializeFrom(input);
     }
 
-    Leg realize(LegPlanned legPlanned) {
+    Leg<Computed> realize(LegPlanned legPlanned) {
         return switch (legPlanned.direction()) {
             case NORTH -> realizeToNorth(legPlanned.start(), legPlanned.steps());
             case EAST -> realizeToEast(legPlanned.start(), legPlanned.steps());
@@ -48,7 +50,7 @@ class Room {
         };
     }
 
-    private Leg realizeToNorth(Position start, int steps) {
+    private Leg<Computed> realizeToNorth(Position start, int steps) {
         var stepsToBorder = start.y;
 
         //  using max() because of system screen coordinate system, y-coordinate advances top down (north to south)
@@ -58,11 +60,10 @@ class Room {
                 .map(stepsToNorthernObstruction(start))
                 .orElse(stepsToBorder);
 
-        return new Leg(
+        return new Leg<>(
                 start,
                 NORTH,
-                availableSteps,
-                terminator(start, NORTH, availableSteps));
+                new Computed(availableSteps, terminator(start, NORTH, availableSteps)));
     }
 
     private static Predicate<Obstruction> obstructionsToTheNorthFrom(Position start) {
@@ -73,7 +74,7 @@ class Room {
         return obstruction -> start.y - obstruction.position.y - 1;
     }
 
-    private Leg realizeToEast(Position start, int steps) {
+    private Leg<Computed> realizeToEast(Position start, int steps) {
         var stepsToBorder = width - start.x - 1;
 
         // using min() because of screen coordinate system, x-coordinate advances left to right (west to east)
@@ -83,11 +84,10 @@ class Room {
                 .map(stepsToEasternObstruction(start))
                 .orElse(stepsToBorder);
 
-        return new Leg(
+        return new Leg<>(
                 start,
                 CardinalDirection.EAST,
-                availableSteps,
-                terminator(start, EAST, availableSteps));
+                new Computed(availableSteps, terminator(start, EAST, availableSteps)));
     }
 
     private static Predicate<Obstruction> obstructionsToTheEastFromStart(Position start) {
@@ -98,7 +98,7 @@ class Room {
         return obstruction -> obstruction.position.x - start.x - 1;
     }
 
-    private Leg realizeToSouth(Position start, int steps) {
+    private Leg<Computed> realizeToSouth(Position start, int steps) {
         var stepsToBorder = length - start.y;
 
         // using min() because of screen coordinate system, y-coordinate advances top down (north to south)
@@ -108,11 +108,10 @@ class Room {
                 .map(stepsToSouthernObstruction(start))
                 .orElse(stepsToBorder);;
 
-        return new Leg(
+        return new Leg<>(
                 start,
                 CardinalDirection.SOUTH,
-                availableSteps,
-                terminator(start, SOUTH, availableSteps));
+                new Computed(availableSteps, terminator(start, SOUTH, availableSteps)));
     }
 
     private static Predicate<Obstruction> obstructionsToTheSouthFrom(Position start) {
@@ -123,7 +122,7 @@ class Room {
         return obstruction -> obstruction.position.y - start.y - 1;
     }
 
-    private Leg realizeToWest(Position start, int steps) {
+    private Leg<Computed> realizeToWest(Position start, int steps) {
         var stepsToBorder = start.x;
 
         // using max() because of screen coordinate system, x-coordinate advances left to right (west to east)
@@ -133,11 +132,10 @@ class Room {
                 .map(stepsToWesternObstruction(start))
                 .orElse(stepsToBorder);
 
-        return new Leg(
+        return new Leg<>(
                 start,
                 CardinalDirection.WEST,
-                availableSteps,
-                terminator(start, WEST, availableSteps));
+                new Computed(availableSteps, terminator(start, WEST, availableSteps)));
     }
 
     private static Predicate<Obstruction> obstructionsToTheWestFrom(Position start) {
