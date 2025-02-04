@@ -21,26 +21,95 @@ class RoomTest {
     @ParameterizedTest
     @MethodSource("realizePlannedLegInEmptyRoom")
     @DisplayName("Should realize guards planned leg in room without any obstructions")
-    void shouldRealizePlannedLegInEmptyRoom(CardinalDirection direction, Leg expectedLeg) {
+    void shouldRealizePlannedLegInEmptyRoom(LegPlanned legPlanned, Leg expectedLeg) {
         var room = Room.from("""
                 ......
-                ......
+                ..^...
                 ......
                 ......
                 ......""");
-
-        Position start = new Position(2, 1);
-        LegPlanned legPlanned = new LegPlanned(start, direction);
 
         assertThat(room.realize(legPlanned)).isEqualTo(expectedLeg);
     }
 
     static Stream<Arguments> realizePlannedLegInEmptyRoom() {
+        var start = new Position(2,1);
+
         return Stream.of(
-                arguments(NORTH, new Leg(new Position(2,1), NORTH, 1, BORDER)),
-                arguments(EAST,  new Leg(new Position(2,1), EAST,  4, BORDER)),
-                arguments(SOUTH, new Leg(new Position(2,1), SOUTH, 3, BORDER)),
-                arguments(WEST,  new Leg(new Position(2,1), WEST,  2, BORDER))
+                arguments(new LegPlanned(start, NORTH), new Leg(start, NORTH, 1, BORDER)),
+                arguments(new LegPlanned(start, EAST),  new Leg(start, EAST,  3, BORDER)),
+                arguments(new LegPlanned(start, SOUTH), new Leg(start, SOUTH, 3, BORDER)),
+                arguments(new LegPlanned(start, WEST),  new Leg(start, WEST,  2, BORDER))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("realizePlannedLegInObstructedRoom")
+    @DisplayName("Should realize guards planned leg in room with obstructions")
+    void shouldRealizePlannedLegInObstructedRoom(LegPlanned legPlanned, Leg expectedLeg) {
+        var room = Room.from("""
+                ..#...
+                #.^..#
+                ......
+                ..#...
+                ..#...""");
+
+        assertThat(room.realize(legPlanned)).isEqualTo(expectedLeg);
+    }
+
+    static Stream<Arguments> realizePlannedLegInObstructedRoom() {
+        var start = new Position(2,1);
+
+        return Stream.of(
+                arguments(new LegPlanned(start, NORTH), new Leg(start, NORTH, 0, OBSTRUCTION)),
+                arguments(new LegPlanned(start, EAST),  new Leg(start, EAST,  2, OBSTRUCTION)),
+                arguments(new LegPlanned(start, SOUTH), new Leg(start, SOUTH, 1, OBSTRUCTION)),
+                arguments(new LegPlanned(start, WEST),  new Leg(start, WEST,  1, OBSTRUCTION))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("computeAvailableStepsToTheNorth")
+    @DisplayName("Should compute available steps to the north")
+    void shouldComputeAvailableStepsToTheNorth(LegPlanned legPlanned, Leg expectedLeg) {
+        var room = Room.from("""
+                .###
+                ..##
+                ...#
+                ^^^^""");
+
+        assertThat(room.realize(legPlanned)).isEqualTo(expectedLeg);
+    }
+
+    static Stream<Arguments> computeAvailableStepsToTheNorth() {
+        return Stream.of(
+                arguments(new LegPlanned(new Position(0, 3), NORTH), new Leg(new Position(0, 3), NORTH, 3, BORDER)),
+                arguments(new LegPlanned(new Position(1, 3), NORTH), new Leg(new Position(1, 3), NORTH, 2, OBSTRUCTION)),
+                arguments(new LegPlanned(new Position(2, 3), NORTH), new Leg(new Position(2, 3), NORTH, 1, OBSTRUCTION)),
+                arguments(new LegPlanned(new Position(3, 3), NORTH), new Leg(new Position(3, 3), NORTH, 0, OBSTRUCTION))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("computeAvailableStepsToTheEast")
+    @DisplayName("Should compute available steps to the east")
+    void shouldComputeAvailableStepsToTheEast(LegPlanned legPlanned, Leg expectedLeg) {
+        var room = Room.from("""
+                >...
+                >..#
+                >.##
+                >###
+                ^^^^""");
+
+        assertThat(room.realize(legPlanned)).isEqualTo(expectedLeg);
+    }
+
+    static Stream<Arguments> computeAvailableStepsToTheEast() {
+        return Stream.of(
+                arguments(new LegPlanned(new Position(0, 0), EAST), new Leg(new Position(0, 0), EAST, 3, BORDER)),
+                arguments(new LegPlanned(new Position(0, 1), EAST), new Leg(new Position(0, 1), EAST, 2, OBSTRUCTION)),
+                arguments(new LegPlanned(new Position(0, 2), EAST), new Leg(new Position(0, 2), EAST, 1, OBSTRUCTION)),
+                arguments(new LegPlanned(new Position(0, 3), EAST), new Leg(new Position(0, 3), EAST, 0, OBSTRUCTION))
         );
     }
 

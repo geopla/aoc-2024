@@ -3,9 +3,14 @@ package day6;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.IntConsumer;
 
+import static day6.CardinalDirection.*;
+import static day6.Terminator.BORDER;
+import static day6.Terminator.OBSTRUCTION;
 import static java.util.Collections.unmodifiableList;
 
 class Room {
@@ -45,41 +50,75 @@ class Room {
     private Leg realizeToNorth(Position start, int steps) {
         var distanceToBorder = start.y;
 
+        int availableSteps = obstructions.stream()
+                .filter(o -> o.position.x == start.x && o.position.y < start.y)
+                .max(Comparator.comparingInt(o -> o.position.y))
+                .map(obstruction -> start.y - obstruction.position.y - 1)
+                .orElse(distanceToBorder);
+
         return new Leg(
                 start,
-                CardinalDirection.NORTH,
-                distanceToBorder,
-                Terminator.BORDER);
+                NORTH,
+                availableSteps,
+                terminator(start, NORTH, availableSteps));
     }
 
     private Leg realizeToEast(Position start, int steps) {
-        var distanceToBorder = width - start.x;
+        var distanceToBorder = width - start.x - 1;
+
+        int availableSteps = obstructions.stream()
+                .filter(o -> o.position.y == start.y && o.position.x > start.x)
+                .min(Comparator.comparingInt(o -> o.position.x))
+                .map(obstruction -> obstruction.position.x - start.x - 1)
+                .orElse(distanceToBorder);
 
         return new Leg(
                 start,
                 CardinalDirection.EAST,
-                distanceToBorder,
-                Terminator.BORDER);
+                availableSteps,
+                terminator(start, EAST, availableSteps));
     }
 
     private Leg realizeToSouth(Position start, int steps) {
         var distanceToBorder = length - start.y;
 
+        int availableSteps = obstructions.stream()
+                .filter(o -> o.position.x == start.x && o.position.y > start.y)
+                .min(Comparator.comparingInt(o -> o.position.y))
+                .map(obstruction -> obstruction.position.y - start.y - 1)
+                .orElse(distanceToBorder);;
+
         return new Leg(
                 start,
                 CardinalDirection.SOUTH,
-                distanceToBorder,
-                Terminator.BORDER);
+                availableSteps,
+                terminator(start, SOUTH, availableSteps));
     }
 
     private Leg realizeToWest(Position start, int steps) {
         var distanceToBorder = start.x;
 
+        int availableSteps = obstructions.stream()
+                .filter(o -> o.position.y == start.y && o.position.x < start.x)
+                .min(Comparator.comparingInt(o -> o.position.x))
+                .map(obstruction -> start.x - obstruction.position.x - 1)
+                .orElse(distanceToBorder);
+
         return new Leg(
                 start,
                 CardinalDirection.WEST,
-                distanceToBorder,
-                Terminator.BORDER);
+                availableSteps,
+                terminator(start, WEST, availableSteps));
+    }
+
+    Terminator terminator(Position start, CardinalDirection direction, int availableSteps) {
+        // very first implementation, not interested in obstruction type yet
+        return switch (direction) {
+            case NORTH -> start.y == availableSteps ? BORDER : OBSTRUCTION;
+            case EAST -> start.x + availableSteps + 1 == width ? BORDER : OBSTRUCTION;
+            case SOUTH -> start.y + availableSteps == length ? BORDER : OBSTRUCTION;
+            case WEST -> start.x == availableSteps ? BORDER : OBSTRUCTION;
+        };
     }
 
     Size size() {
