@@ -5,8 +5,9 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.IntConsumer;
+import java.util.function.Predicate;
 
 import static day6.CardinalDirection.*;
 import static day6.Terminator.BORDER;
@@ -48,13 +49,14 @@ class Room {
     }
 
     private Leg realizeToNorth(Position start, int steps) {
-        var distanceToBorder = start.y;
+        var stepsToBorder = start.y;
 
+        //  using max() because of system screen coordinate system, y-coordinate advances top down (north to south)
         int availableSteps = obstructions.stream()
-                .filter(o -> o.position.x == start.x && o.position.y < start.y)
+                .filter(obstructionsToTheNorthFrom(start))
                 .max(Comparator.comparingInt(o -> o.position.y))
-                .map(obstruction -> start.y - obstruction.position.y - 1)
-                .orElse(distanceToBorder);
+                .map(stepsToNorthernObstruction(start))
+                .orElse(stepsToBorder);
 
         return new Leg(
                 start,
@@ -63,14 +65,23 @@ class Room {
                 terminator(start, NORTH, availableSteps));
     }
 
-    private Leg realizeToEast(Position start, int steps) {
-        var distanceToBorder = width - start.x - 1;
+    private static Predicate<Obstruction> obstructionsToTheNorthFrom(Position start) {
+        return o -> o.position.x == start.x && o.position.y < start.y;
+    }
 
+    private static Function<Obstruction, Integer> stepsToNorthernObstruction(Position start) {
+        return obstruction -> start.y - obstruction.position.y - 1;
+    }
+
+    private Leg realizeToEast(Position start, int steps) {
+        var stepsToBorder = width - start.x - 1;
+
+        // using min() because of screen coordinate system, x-coordinate advances left to right (west to east)
         int availableSteps = obstructions.stream()
-                .filter(o -> o.position.y == start.y && o.position.x > start.x)
+                .filter(obstructionsToTheEastFromStart(start))
                 .min(Comparator.comparingInt(o -> o.position.x))
-                .map(obstruction -> obstruction.position.x - start.x - 1)
-                .orElse(distanceToBorder);
+                .map(stepsToEasternObstruction(start))
+                .orElse(stepsToBorder);
 
         return new Leg(
                 start,
@@ -79,14 +90,23 @@ class Room {
                 terminator(start, EAST, availableSteps));
     }
 
-    private Leg realizeToSouth(Position start, int steps) {
-        var distanceToBorder = length - start.y;
+    private static Predicate<Obstruction> obstructionsToTheEastFromStart(Position start) {
+        return o -> o.position.y == start.y && o.position.x > start.x;
+    }
 
+    private static Function<Obstruction, Integer> stepsToEasternObstruction(Position start) {
+        return obstruction -> obstruction.position.x - start.x - 1;
+    }
+
+    private Leg realizeToSouth(Position start, int steps) {
+        var stepsToBorder = length - start.y;
+
+        // using min() because of screen coordinate system, y-coordinate advances top down (north to south)
         int availableSteps = obstructions.stream()
-                .filter(o -> o.position.x == start.x && o.position.y > start.y)
+                .filter(obstructionsToTheSouthFrom(start))
                 .min(Comparator.comparingInt(o -> o.position.y))
-                .map(obstruction -> obstruction.position.y - start.y - 1)
-                .orElse(distanceToBorder);;
+                .map(stepsToSouthernObstruction(start))
+                .orElse(stepsToBorder);;
 
         return new Leg(
                 start,
@@ -95,20 +115,37 @@ class Room {
                 terminator(start, SOUTH, availableSteps));
     }
 
-    private Leg realizeToWest(Position start, int steps) {
-        var distanceToBorder = start.x;
+    private static Predicate<Obstruction> obstructionsToTheSouthFrom(Position start) {
+        return o -> o.position.x == start.x && o.position.y > start.y;
+    }
 
+    private static Function<Obstruction, Integer> stepsToSouthernObstruction(Position start) {
+        return obstruction -> obstruction.position.y - start.y - 1;
+    }
+
+    private Leg realizeToWest(Position start, int steps) {
+        var stepsToBorder = start.x;
+
+        // using max() because of screen coordinate system, x-coordinate advances left to right (west to east)
         int availableSteps = obstructions.stream()
-                .filter(o -> o.position.y == start.y && o.position.x < start.x)
-                .max(Comparator.comparingInt(o -> o.position.x))
-                .map(obstruction -> start.x - obstruction.position.x - 1)
-                .orElse(distanceToBorder);
+                .filter(obstructionsToTheWestFrom(start))
+                .max(Comparator.comparingInt(o1 -> o1.position.x))
+                .map(stepsToWesternObstruction(start))
+                .orElse(stepsToBorder);
 
         return new Leg(
                 start,
                 CardinalDirection.WEST,
                 availableSteps,
                 terminator(start, WEST, availableSteps));
+    }
+
+    private static Predicate<Obstruction> obstructionsToTheWestFrom(Position start) {
+        return o -> o.position.y == start.y && o.position.x < start.x;
+    }
+
+    private static Function<Obstruction, Integer> stepsToWesternObstruction(Position start) {
+        return obstruction -> start.x - obstruction.position.x - 1;
     }
 
     Terminator terminator(Position start, CardinalDirection direction, int availableSteps) {
