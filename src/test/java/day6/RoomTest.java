@@ -5,13 +5,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
 import static day6.CardinalDirection.*;
-import static day6.Terminator.*;
+import static day6.Terminator.BORDER;
+import static day6.Terminator.OBSTRUCTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -98,8 +98,7 @@ class RoomTest {
                 >...
                 >..#
                 >.##
-                >###
-                ^^^^""");
+                >###""");
 
         assertThat(room.realize(legPlanned)).isEqualTo(expectedLeg);
     }
@@ -110,6 +109,50 @@ class RoomTest {
                 arguments(new LegPlanned(new Position(0, 1), EAST), new Leg(new Position(0, 1), EAST, 2, OBSTRUCTION)),
                 arguments(new LegPlanned(new Position(0, 2), EAST), new Leg(new Position(0, 2), EAST, 1, OBSTRUCTION)),
                 arguments(new LegPlanned(new Position(0, 3), EAST), new Leg(new Position(0, 3), EAST, 0, OBSTRUCTION))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("computeAvailableStepsToTheSouth")
+    @DisplayName("Should compute available steps to the south")
+    void shouldComputeAvailableStepsToTheSouth(LegPlanned legPlanned, Leg expectedLeg) {
+        var room = Room.from("""
+                vvvv
+                ...#
+                ..##
+                .###""");
+
+        assertThat(room.realize(legPlanned)).isEqualTo(expectedLeg);
+    }
+
+    static Stream<Arguments> computeAvailableStepsToTheSouth() {
+        return Stream.of(
+                arguments(new LegPlanned(new Position(0, 0), SOUTH), new Leg(new Position(0, 0), SOUTH, 3, BORDER)),
+                arguments(new LegPlanned(new Position(1, 0), SOUTH), new Leg(new Position(1, 0), SOUTH, 2, OBSTRUCTION)),
+                arguments(new LegPlanned(new Position(2, 0), SOUTH), new Leg(new Position(2, 0), SOUTH, 1, OBSTRUCTION)),
+                arguments(new LegPlanned(new Position(3, 0), SOUTH), new Leg(new Position(3, 0), SOUTH, 0, OBSTRUCTION))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("computeAvailableStepsToTheWest")
+    @DisplayName("Should compute available steps to the west")
+    void shouldComputeAvailableStepsToTheWest(LegPlanned legPlanned, Leg expectedLeg) {
+        var room = Room.from("""
+                ...<
+                #..<
+                ##.<
+                ###<""");
+
+        assertThat(room.realize(legPlanned)).isEqualTo(expectedLeg);
+    }
+
+    static Stream<Arguments> computeAvailableStepsToTheWest() {
+        return Stream.of(
+                arguments(new LegPlanned(new Position(3, 0), WEST), new Leg(new Position(3, 0), WEST, 3, BORDER)),
+                arguments(new LegPlanned(new Position(3, 1), WEST), new Leg(new Position(3, 1), WEST, 2, OBSTRUCTION)),
+                arguments(new LegPlanned(new Position(3, 2), WEST), new Leg(new Position(3, 2), WEST, 1, OBSTRUCTION)),
+                arguments(new LegPlanned(new Position(3, 3), WEST), new Leg(new Position(3, 3), WEST, 0, OBSTRUCTION))
         );
     }
 

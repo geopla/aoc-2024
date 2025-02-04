@@ -100,7 +100,7 @@ class Room {
 
         int availableSteps = obstructions.stream()
                 .filter(o -> o.position.y == start.y && o.position.x < start.x)
-                .min(Comparator.comparingInt(o -> o.position.x))
+                .max(Comparator.comparingInt(o -> o.position.x))
                 .map(obstruction -> start.x - obstruction.position.x - 1)
                 .orElse(distanceToBorder);
 
