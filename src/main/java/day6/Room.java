@@ -18,17 +18,17 @@ import static java.util.Collections.unmodifiableList;
 
 class Room {
 
+    record Size(int width, int length) { }
+    record Position(int x, int y) { }
+    record Obstruction(char type, Position position) { }
+
     private int length = 0;
     private int width = 0;
     private int currentX = 0;
 
-    record Size(int width, int length) { }
-
-    record Position(int x, int y) { }
-    record Obstruction(char type, Position position) { }
     private final List<Obstruction> obstructions = new ArrayList<>();
-
     private final List<Guard> guards = new ArrayList<>();
+
     public static Room from(Reader input) {
         return new Room(input);
     }
