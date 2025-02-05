@@ -41,7 +41,7 @@ class Room {
         initializeFrom(input);
     }
 
-    Leg<Computed> realize(LegPlanned legPlanned) {
+    Leg<Computed> realize(Leg<Lifecycle.Planned> legPlanned) {
         return switch (legPlanned.direction()) {
             case NORTH -> realizeToNorth(legPlanned.start(), legPlanned.steps());
             case EAST -> realizeToEast(legPlanned.start(), legPlanned.steps());
@@ -63,7 +63,8 @@ class Room {
         return new Leg<>(
                 start,
                 NORTH,
-                new Computed(availableSteps, terminator(start, NORTH, availableSteps)));
+                availableSteps,
+                new Computed(terminator(start, NORTH, availableSteps)));
     }
 
     private static Predicate<Obstruction> obstructionsToTheNorthFrom(Position start) {
@@ -87,7 +88,8 @@ class Room {
         return new Leg<>(
                 start,
                 CardinalDirection.EAST,
-                new Computed(availableSteps, terminator(start, EAST, availableSteps)));
+                availableSteps,
+                new Computed(terminator(start, EAST, availableSteps)));
     }
 
     private static Predicate<Obstruction> obstructionsToTheEastFromStart(Position start) {
@@ -111,7 +113,8 @@ class Room {
         return new Leg<>(
                 start,
                 CardinalDirection.SOUTH,
-                new Computed(availableSteps, terminator(start, SOUTH, availableSteps)));
+                availableSteps,
+                new Computed(terminator(start, SOUTH, availableSteps)));
     }
 
     private static Predicate<Obstruction> obstructionsToTheSouthFrom(Position start) {
@@ -135,7 +138,8 @@ class Room {
         return new Leg<>(
                 start,
                 CardinalDirection.WEST,
-                new Computed(availableSteps, terminator(start, WEST, availableSteps)));
+                availableSteps,
+                new Computed(terminator(start, WEST, availableSteps)));
     }
 
     private static Predicate<Obstruction> obstructionsToTheWestFrom(Position start) {
