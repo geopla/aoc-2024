@@ -1,11 +1,17 @@
 package day6;
 
-import java.util.stream.Stream;
-
 record Leg<State extends Lifecycle>(
         Room.Position start,
         CardinalDirection direction,
         int steps,
         State state) {
-}
 
+    Room.Position end() {
+        return switch (direction) {
+            case NORTH -> new Room.Position(start.x(), start.y() - steps);
+            case EAST -> new Room.Position(start.x() + steps, start.y());
+            case SOUTH -> new Room.Position(start.x(), start.y() + steps);
+            case WEST -> new Room.Position(start.x() - steps, start.y());
+        };
+    }
+}

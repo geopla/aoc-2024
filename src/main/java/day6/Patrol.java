@@ -14,12 +14,31 @@ class Patrol {
     }
 
     Stream<Leg<Computed>> walkOfGuard(int number) {
-        var guard = room.guards().get(number);
+        final Guard guard = room.guards().get(number);
+        final Leg<Computed> legSeed = firstLegOf(guard);
+
+        return Stream.iterate(legSeed,
+                leg -> {
+                    var steps = Integer.MAX_VALUE;
+                    var planned = new Planned();
+                    var start = leg.end();
+                    var direction = guard.turnStrategy()
+                            .changeDirectionOn(leg.state().terminator(), leg.direction())
+                            .orElse(leg.direction());
+                    var legPlanned = new Leg<>(start, direction, steps, planned);
+
+                    return room.realize(legPlanned);
+                })
+                .takeWhile(computedLeg -> computedLeg.steps() != 0);
+    }
+
+    private Leg<Computed> firstLegOf(Guard guard) {
         var steps = Integer.MAX_VALUE;
         var planned = new Planned();
-
         var legPlanned = new Leg<>(guard.startPosition(), guard.startFacing(), steps, planned);
 
-        return Stream.of(room.realize(legPlanned));
+        return room.realize(legPlanned);
     }
+
+
 }
