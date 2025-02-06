@@ -15,27 +15,25 @@ class Patrol {
 
     Stream<Leg<Computed>> walkOfGuard(int number) {
         final Guard guard = room.guards().get(number);
-        final Leg<Computed> legSeed = firstLegOf(guard);
+        Leg<Computed> firstLeg = firstLegOf(guard);
 
-        return Stream.iterate(legSeed,
+        return Stream.iterate(firstLeg, computedLeg -> computedLeg.steps() != 0,
                 leg -> {
-                    var steps = Integer.MAX_VALUE;
-                    var planned = new Planned();
                     var start = leg.end();
                     var direction = guard.turnStrategy()
-                            .changeDirectionOn(leg.state().terminator(), leg.direction())
-                            .orElse(leg.direction());
-                    var legPlanned = new Leg<>(start, direction, steps, planned);
+                            .changeDirectionOn(leg)
+                            .orElse(keepDirectionWhenGuardIsStuckOn(leg));
 
-                    return room.realize(legPlanned);
-                })
-                .takeWhile(computedLeg -> computedLeg.steps() != 0);
+                    return room.realize(new Leg<>(start, direction, Leg.stepsUnlimited(), new Planned()));
+                });
+    }
+
+    private static CardinalDirection keepDirectionWhenGuardIsStuckOn(Leg<Computed> leg) {
+        return leg.direction();
     }
 
     private Leg<Computed> firstLegOf(Guard guard) {
-        var steps = Integer.MAX_VALUE;
-        var planned = new Planned();
-        var legPlanned = new Leg<>(guard.startPosition(), guard.startFacing(), steps, planned);
+        var legPlanned = new Leg<>(guard.startPosition(), guard.startFacing(), Leg.stepsUnlimited(), new Planned());
 
         return room.realize(legPlanned);
     }

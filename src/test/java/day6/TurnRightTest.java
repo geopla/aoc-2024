@@ -1,5 +1,6 @@
 package day6;
 
+import day6.Lifecycle.Computed;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,16 +22,18 @@ class TurnRightTest {
     @ParameterizedTest
     @MethodSource("turnRightOnObstructionOnly")
     @DisplayName("Should turn right by on obstruction when using default turn strategy")
-    void shouldTurnRightOnObstructionOnly(CardinalDirection currentFacing, CardinalDirection expectedFacing) {
-        assertThat(turnRightStrategy.changeDirectionOn(OBSTRUCTION, currentFacing)).contains(expectedFacing);
+    void shouldTurnRightOnObstructionOnly(Leg<Computed> leg, CardinalDirection expectedFacing) {
+        assertThat(turnRightStrategy.changeDirectionOn(leg)).contains(expectedFacing);
     }
 
     static Stream<Arguments> turnRightOnObstructionOnly() {
+        var start = new Room.Position(3, 3);
+
         return Stream.of(
-            Arguments.arguments(NORTH, EAST),
-            Arguments.arguments(EAST,  SOUTH),
-            Arguments.arguments(SOUTH, WEST),
-            Arguments.arguments(WEST,  NORTH)
+            Arguments.arguments(new Leg<>(start, NORTH, 2, new Computed(OBSTRUCTION)), EAST),
+            Arguments.arguments(new Leg<>(start, EAST, 2, new Computed(OBSTRUCTION)),  SOUTH),
+            Arguments.arguments(new Leg<>(start, SOUTH, 2, new Computed(OBSTRUCTION)), WEST),
+            Arguments.arguments(new Leg<>(start, WEST, 2, new Computed(OBSTRUCTION)),  NORTH)
         );
     }
 
@@ -38,6 +41,7 @@ class TurnRightTest {
     @EnumSource(CardinalDirection.class)
     @DisplayName("Should keep facing in border when using default turn strategy")
     void shouldKeepFacingOnBorder(CardinalDirection comingFrom) {
-        assertThat(turnRightStrategy.changeDirectionOn(BORDER, comingFrom)).isEmpty();
+        var legToBorder = new Leg<>(new Room.Position(3, 3), NORTH, 2, new Computed(BORDER));
+        assertThat(turnRightStrategy.changeDirectionOn(legToBorder)).isEmpty();
     }
 }

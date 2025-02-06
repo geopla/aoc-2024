@@ -6,6 +6,10 @@ record Leg<State extends Lifecycle>(
         int steps,
         State state) {
 
+    static int stepsUnlimited() {
+        return Integer.MAX_VALUE;
+    }
+
     Room.Position end() {
         return switch (direction) {
             case NORTH -> new Room.Position(start.x(), start.y() - steps);
