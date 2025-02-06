@@ -14,10 +14,12 @@ class Patrol {
     }
 
     Stream<Leg<Computed>> walkOfGuard(int number) {
-        final Guard guard = room.guards().get(number);
+        Guard guard = room.guards().get(number);
         Leg<Computed> firstLeg = firstLegOf(guard);
 
-        return Stream.iterate(firstLeg, computedLeg -> computedLeg.steps() != 0,
+        return Stream.iterate(
+                firstLeg,
+                computedLeg -> computedLeg.steps() != 0,
                 leg -> {
                     var start = leg.end();
                     var direction = guard.turnStrategy()
@@ -26,6 +28,17 @@ class Patrol {
 
                     return room.realize(new Leg<>(start, direction, Leg.stepsUnlimited(), new Planned()));
                 });
+    }
+
+    Stream<Room.Position> positionsVisitedByGuard(int number) {
+        var guard = room.guards().get(number);
+        var firstElement = 1;
+
+        return Stream.concat(
+                Stream.of(guard.startPosition()),
+                walkOfGuard(number)
+                    .flatMap(leg -> leg.positions().skip(firstElement))
+        );
     }
 
     private static CardinalDirection keepDirectionWhenGuardIsStuckOn(Leg<Computed> leg) {
@@ -37,6 +50,4 @@ class Patrol {
 
         return room.realize(legPlanned);
     }
-
-
 }
