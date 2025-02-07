@@ -12,15 +12,16 @@ class Guard {
 
     Guard(Room room, Room.Position position, char facing) {
         this.room = room;
-        startPosition = position;
-
-        // hard coded due to current requirement but may change in future
-        startFacing = NORTH;
-
-        if (facing != '^') {
-            throw new IllegalArgumentException("guard's start facing needs to be north");
+        if (room == null) {
+            throw new IllegalArgumentException("guard must be assigned to a room");
         }
 
+        startPosition = position;
+        if (startPosition == null) {
+            throw new IllegalArgumentException("guard must be placed on a start position");
+        }
+
+        startFacing = CardinalDirection.from(facing);
         turnStrategy = new TurnRight();
     }
 

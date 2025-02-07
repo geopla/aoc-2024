@@ -48,4 +48,14 @@ enum CardinalDirection {
 
     abstract CardinalDirection turnLeft();
     abstract CardinalDirection turnRight();
+
+    static CardinalDirection from(char symbol) {
+        return switch (symbol) {
+            case '^' -> NORTH;
+            case '>' -> EAST;
+            case 'v' -> SOUTH;
+            case '<' -> WEST;
+            default -> throw new IllegalArgumentException("unknown direction symbol '%c'".formatted(symbol));
+        };
+    }
 }

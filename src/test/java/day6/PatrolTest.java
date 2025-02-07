@@ -4,6 +4,8 @@ import day6.Lifecycle.Computed;
 import day6.Room.Position;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static day6.CardinalDirection.*;
 import static day6.Terminator.BORDER;
@@ -177,5 +179,47 @@ class PatrolTest {
                 new Position(1, 3),
                 new Position(0, 3)
         );
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, '---#--'",
+            "1, '---XXX'",
+            "2, '---X--'",
+            "3, '------'",
+    })
+    @DisplayName("Should mark visits in within a line")
+    void shouldMarkVisitsInLine(int lineNumber, String expectedLine) {
+        var room = Room.from("""
+                ...#..
+                ......
+                ...^..
+                ......""");
+
+        var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
+
+        assertThat(patrol.visitsInLineByGuard(lineNumber, guard)).isEqualTo(expectedLine);
+    }
+
+    @Test
+    @DisplayName("Should format visited positions to readable output")
+    void shouldFormatToReadableOutput() {
+        var room = Room.from("""
+                ...#..
+                ......
+                ...^..
+                ......""");
+
+        var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
+
+        String visits = patrol.visitsInLinesBy(guard);
+
+        assertThat(visits).isEqualTo("""
+                ---#--
+                ---XXX
+                ---X--
+                ------""");
     }
 }

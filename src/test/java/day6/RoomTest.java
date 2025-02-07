@@ -9,6 +9,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static day6.CardinalDirection.*;
@@ -35,15 +41,15 @@ class RoomTest {
     }
 
     static Stream<Arguments> realizePlannedLegInEmptyRoom() {
-        var start = new Position(2,1);
+        var start = new Position(2, 1);
         var steps = Integer.MAX_VALUE;
         var planned = new Planned();
 
         return Stream.of(
                 arguments(new Leg<>(start, NORTH, steps, planned), new Leg<>(start, NORTH, 1, new Computed(BORDER))),
-                arguments(new Leg<>(start, EAST,  steps, planned), new Leg<>(start, EAST,  3, new Computed(BORDER))),
+                arguments(new Leg<>(start, EAST, steps, planned), new Leg<>(start, EAST, 3, new Computed(BORDER))),
                 arguments(new Leg<>(start, SOUTH, steps, planned), new Leg<>(start, SOUTH, 3, new Computed(BORDER))),
-                arguments(new Leg<>(start, WEST,  steps, planned), new Leg<>(start, WEST,  2, new Computed(BORDER)))
+                arguments(new Leg<>(start, WEST, steps, planned), new Leg<>(start, WEST, 2, new Computed(BORDER)))
         );
     }
 
@@ -62,15 +68,15 @@ class RoomTest {
     }
 
     static Stream<Arguments> realizePlannedLegInObstructedRoom() {
-        var start = new Position(2,1);
+        var start = new Position(2, 1);
         var steps = Integer.MAX_VALUE;
         var planned = new Planned();
 
         return Stream.of(
                 arguments(new Leg<>(start, NORTH, steps, planned), new Leg<>(start, NORTH, 0, new Computed(OBSTRUCTION))),
-                arguments(new Leg<>(start, EAST,  steps, planned), new Leg<>(start, EAST,  2, new Computed(OBSTRUCTION))),
+                arguments(new Leg<>(start, EAST, steps, planned), new Leg<>(start, EAST, 2, new Computed(OBSTRUCTION))),
                 arguments(new Leg<>(start, SOUTH, steps, planned), new Leg<>(start, SOUTH, 1, new Computed(OBSTRUCTION))),
-                arguments(new Leg<>(start, WEST,  steps, planned), new Leg<>(start, WEST,  1, new Computed(OBSTRUCTION)))
+                arguments(new Leg<>(start, WEST, steps, planned), new Leg<>(start, WEST, 1, new Computed(OBSTRUCTION)))
         );
     }
 
@@ -117,10 +123,10 @@ class RoomTest {
         var planned = new Planned();
 
         return Stream.of(
-                arguments(new Leg<>(new Position(0, 0), EAST, steps, planned), new Leg<>(new Position(0, 0), EAST,3, new Computed(BORDER))),
-                arguments(new Leg<>(new Position(0, 1), EAST, steps, planned), new Leg<>(new Position(0, 1), EAST,2, new Computed(OBSTRUCTION))),
-                arguments(new Leg<>(new Position(0, 2), EAST, steps, planned), new Leg<>(new Position(0, 2), EAST,1, new Computed(OBSTRUCTION))),
-                arguments(new Leg<>(new Position(0, 3), EAST, steps, planned), new Leg<>(new Position(0, 3), EAST,0, new Computed(OBSTRUCTION)))
+                arguments(new Leg<>(new Position(0, 0), EAST, steps, planned), new Leg<>(new Position(0, 0), EAST, 3, new Computed(BORDER))),
+                arguments(new Leg<>(new Position(0, 1), EAST, steps, planned), new Leg<>(new Position(0, 1), EAST, 2, new Computed(OBSTRUCTION))),
+                arguments(new Leg<>(new Position(0, 2), EAST, steps, planned), new Leg<>(new Position(0, 2), EAST, 1, new Computed(OBSTRUCTION))),
+                arguments(new Leg<>(new Position(0, 3), EAST, steps, planned), new Leg<>(new Position(0, 3), EAST, 0, new Computed(OBSTRUCTION)))
         );
     }
 
@@ -142,10 +148,10 @@ class RoomTest {
         var planned = new Planned();
 
         return Stream.of(
-                arguments(new Leg<>(new Position(0, 0), SOUTH, steps, planned), new Leg<>(new Position(0, 0), SOUTH,3, new Computed(BORDER))),
-                arguments(new Leg<>(new Position(1, 0), SOUTH, steps, planned), new Leg<>(new Position(1, 0), SOUTH,2, new Computed(OBSTRUCTION))),
-                arguments(new Leg<>(new Position(2, 0), SOUTH, steps, planned), new Leg<>(new Position(2, 0), SOUTH,1, new Computed(OBSTRUCTION))),
-                arguments(new Leg<>(new Position(3, 0), SOUTH, steps, planned), new Leg<>(new Position(3, 0), SOUTH,0, new Computed(OBSTRUCTION)))
+                arguments(new Leg<>(new Position(0, 0), SOUTH, steps, planned), new Leg<>(new Position(0, 0), SOUTH, 3, new Computed(BORDER))),
+                arguments(new Leg<>(new Position(1, 0), SOUTH, steps, planned), new Leg<>(new Position(1, 0), SOUTH, 2, new Computed(OBSTRUCTION))),
+                arguments(new Leg<>(new Position(2, 0), SOUTH, steps, planned), new Leg<>(new Position(2, 0), SOUTH, 1, new Computed(OBSTRUCTION))),
+                arguments(new Leg<>(new Position(3, 0), SOUTH, steps, planned), new Leg<>(new Position(3, 0), SOUTH, 0, new Computed(OBSTRUCTION)))
         );
     }
 
@@ -167,10 +173,10 @@ class RoomTest {
         var planned = new Planned();
 
         return Stream.of(
-                arguments(new Leg<>(new Position(3, 0), WEST, steps, planned), new Leg<>(new Position(3, 0), WEST,3, new Computed(BORDER))),
-                arguments(new Leg<>(new Position(3, 1), WEST, steps, planned), new Leg<>(new Position(3, 1), WEST,2, new Computed(OBSTRUCTION))),
-                arguments(new Leg<>(new Position(3, 2), WEST, steps, planned), new Leg<>(new Position(3, 2), WEST,1, new Computed(OBSTRUCTION))),
-                arguments(new Leg<>(new Position(3, 3), WEST, steps, planned), new Leg<>(new Position(3, 3), WEST,0, new Computed(OBSTRUCTION)))
+                arguments(new Leg<>(new Position(3, 0), WEST, steps, planned), new Leg<>(new Position(3, 0), WEST, 3, new Computed(BORDER))),
+                arguments(new Leg<>(new Position(3, 1), WEST, steps, planned), new Leg<>(new Position(3, 1), WEST, 2, new Computed(OBSTRUCTION))),
+                arguments(new Leg<>(new Position(3, 2), WEST, steps, planned), new Leg<>(new Position(3, 2), WEST, 1, new Computed(OBSTRUCTION))),
+                arguments(new Leg<>(new Position(3, 3), WEST, steps, planned), new Leg<>(new Position(3, 3), WEST, 0, new Computed(OBSTRUCTION)))
         );
     }
 
@@ -181,6 +187,18 @@ class RoomTest {
                 ...
                 ...
                 """;
+
+        var roomSize = Room.from(roomMap).size();
+
+        assertThat(roomSize).isEqualTo(new Room.Size(3, 2));
+    }
+
+    @Test
+    @DisplayName("Should have dimension computed from map input not having a terminal newline")
+    void shouldHaveDimensionWhenFinalNewlineIsMissing() {
+        var roomMap = """
+                ...
+                ...""";
 
         var roomSize = Room.from(roomMap).size();
 
@@ -224,4 +242,20 @@ class RoomTest {
         );
     }
 
+    @Test
+    @DisplayName("Should take input from file")
+    void shouldTakeFileInput() {
+        try (var reader = fromResource("day6-example-input.txt")) {
+            assertThat(Room.from(reader)).isNotNull();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    Reader fromResource(String name) {
+        var roomInputStream = Room.class.getResourceAsStream(name);
+
+        return new InputStreamReader(roomInputStream, StandardCharsets.UTF_8);
+    }
 }

@@ -3,6 +3,9 @@ package day6;
 import day6.Lifecycle.Computed;
 import day6.Lifecycle.Planned;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 class Patrol {
@@ -50,5 +53,42 @@ class Patrol {
         var legPlanned = new Leg<>(guard.startPosition(), guard.startFacing(), Leg.stepsUnlimited(), new Planned());
 
         return room.realize(legPlanned);
+    }
+
+    String visitsInLineByGuard(int lineNumber, Guard guard) {
+        var obstructionPositions = room.obstructions().stream()
+                .map(Room.Obstruction::position)
+                .filter(position -> position.y() == lineNumber)
+                .toList();
+
+        var visitedPositions = distinctPositionsVisitedBy(guard)
+                .filter(position -> position.y() == lineNumber)
+                .toList();
+
+
+        return IntStream.range(0, room.size().width())
+                .boxed()
+                .map(i -> new Room.Position(i, lineNumber))
+                .map(position -> {
+                    String marker = "-";
+
+                    if (visitedPositions.contains(position)) {
+                        marker = "X";
+                    }
+                    else if (obstructionPositions.contains(position)) {
+                        marker = "#";
+                    }
+
+                    return marker;
+                })
+                .collect(Collectors.joining());
+    }
+
+
+    public String visitsInLinesBy(Guard guard) {
+        return IntStream.range(0, room.size().length())
+                .boxed()
+                .map(i -> visitsInLineByGuard(i, guard))
+                .collect(Collectors.joining("\n"));
     }
 }

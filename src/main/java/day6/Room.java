@@ -22,8 +22,8 @@ class Room {
     record Position(int x, int y) { }
     record Obstruction(char type, Position position) { }
 
-    private int length = 0;
     private int width = 0;
+    private int depth = 0;
     private int currentX = 0;
 
     private final List<Obstruction> obstructions = new ArrayList<>();
@@ -101,7 +101,7 @@ class Room {
     }
 
     private Leg<Computed> realizeToSouth(Position start, int steps) {
-        var stepsToBorder = length - start.y;
+        var stepsToBorder = depth - start.y - 1;
 
         // using min() because of screen coordinate system, y-coordinate advances top down (north to south)
         int availableSteps = obstructions.stream()
@@ -155,13 +155,13 @@ class Room {
         return switch (direction) {
             case NORTH -> start.y == availableSteps ? BORDER : OBSTRUCTION;
             case EAST -> start.x + availableSteps + 1 == width ? BORDER : OBSTRUCTION;
-            case SOUTH -> start.y + availableSteps == length ? BORDER : OBSTRUCTION;
+            case SOUTH -> start.y + availableSteps + 1 == depth ? BORDER : OBSTRUCTION;
             case WEST -> start.x == availableSteps ? BORDER : OBSTRUCTION;
         };
     }
 
     Size size() {
-        return new Size(width, length);
+        return new Size(width, depth);
     }
 
     List<Obstruction> obstructions() {
@@ -174,20 +174,23 @@ class Room {
 
     private void initializeFrom(Reader input) {
         Room thisRoom = this;
+        final int[] lastCodePoint = new int[1];
 
         Map.codePoints(input).forEach(new IntConsumer() {
             @Override
             public void accept(int codePoint) {
+                lastCodePoint[0] = codePoint;
+
                 if (isBorder(codePoint)) {
                     increaseLength();
                     increaseWidthOnDemand();
                 }
                 else if (isObstruction(codePoint)) {
-                    obstructions.add(new Obstruction((char) codePoint, new Position(currentX, length)));
+                    obstructions.add(new Obstruction((char) codePoint, new Position(currentX, depth)));
                     ++currentX;
                 }
                 else if (isGuard(codePoint)) {
-                    guards.add(new Guard(thisRoom, new Position(currentX, length), (char) codePoint));
+                    guards.add(new Guard(thisRoom, new Position(currentX, depth), (char) codePoint));
                     ++currentX;
                 }
                 else {
@@ -195,10 +198,14 @@ class Room {
                 }
             }
         });
+
+        if (!isBorder(lastCodePoint[0])) {
+            increaseLength();
+        }
     }
 
     private void increaseLength() {
-        ++length;
+        ++depth;
     }
 
     private void increaseWidthOnDemand() {
