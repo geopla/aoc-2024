@@ -25,7 +25,7 @@ class PatrolTest {
         var guard = room.guards().getFirst();
 
         assertThat(patrol.walkOf(guard)).containsExactly(
-           new Leg<>(new Position(3, 2), NORTH, 2, new Computed(BORDER))
+                new Leg<>(new Position(3, 2), NORTH, 2, new Computed(BORDER))
         );
     }
 
@@ -42,9 +42,9 @@ class PatrolTest {
         var guard = room.guards().getFirst();
 
         assertThat(patrol.positionsVisitedBy(guard)).containsExactly(
-          new Position(3, 2),
-          new Position(3, 1),
-          new Position(3, 0)
+                new Position(3, 2),
+                new Position(3, 1),
+                new Position(3, 0)
         );
     }
 
@@ -83,8 +83,8 @@ class PatrolTest {
                 new Position(3, 2),
                 new Position(3, 1),
                 // leg 2
-                new Position( 4, 1),
-                new Position( 5, 1)
+                new Position(4, 1),
+                new Position(5, 1)
         );
     }
 
@@ -102,9 +102,9 @@ class PatrolTest {
 
         assertThat(patrol.walkOf(guard)).containsExactly(
                 new Leg<>(new Position(3, 2), NORTH, 1, new Computed(OBSTRUCTION)),
-                new Leg<>(new Position(3, 1), EAST,  1, new Computed(OBSTRUCTION)),
+                new Leg<>(new Position(3, 1), EAST, 1, new Computed(OBSTRUCTION)),
                 new Leg<>(new Position(4, 1), SOUTH, 1, new Computed(OBSTRUCTION)),
-                new Leg<>(new Position(4, 2), WEST,  3, new Computed(OBSTRUCTION)),
+                new Leg<>(new Position(4, 2), WEST, 3, new Computed(OBSTRUCTION)),
                 new Leg<>(new Position(1, 2), NORTH, 2, new Computed(BORDER))
         );
     }
@@ -126,9 +126,9 @@ class PatrolTest {
                 new Position(3, 2),
                 new Position(3, 1),
                 // leg 1 - east
-                new Position( 4,1),
+                new Position(4, 1),
                 // leg 2 - south
-                new Position( 4,2),
+                new Position(4, 2),
                 // leg 3 - west
                 new Position(3, 2),
                 new Position(2, 2),
@@ -136,6 +136,46 @@ class PatrolTest {
                 // leg 5 - north
                 new Position(1, 1),
                 new Position(1, 0)
+        );
+    }
+
+    @Test
+    @DisplayName("Should provide DISTINCT positions visited")
+    void shouldProvideDistinctPositionsVisited() {
+        var room = Room.from("""
+                ..#....
+                ..xxxx#
+                ..x..x.
+                xxxxxx.
+                ..^..#.""");
+
+        var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
+
+        assertThat(patrol.distinctPositionsVisitedBy(guard)).containsExactly(
+                // start
+                new Position(2, 4),
+
+                // to north
+                new Position(2, 3),
+                new Position(2, 2),
+                new Position(2, 1),
+
+                // to east
+                new Position(3, 1),
+                new Position(4, 1),
+                new Position(5, 1),
+
+                // to south
+                new Position(5, 2),
+                new Position(5, 3),
+
+                // to west
+                new Position(4, 3),
+                new Position(3, 3),
+                //     nope (   2,    3)  has been visited already
+                new Position(1, 3),
+                new Position(0, 3)
         );
     }
 }

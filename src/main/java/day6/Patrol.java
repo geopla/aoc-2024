@@ -38,6 +38,10 @@ class Patrol {
         );
     }
 
+    Stream<Room.Position> distinctPositionsVisitedBy(Guard guard) {
+        return positionsVisitedBy(guard).distinct();
+    }
+
     private static CardinalDirection keepDirectionWhenGuardIsStuckOn(Leg<Computed> leg) {
         return leg.direction();
     }
