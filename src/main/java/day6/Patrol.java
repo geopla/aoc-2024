@@ -13,8 +13,7 @@ class Patrol {
         this.room = room;
     }
 
-    Stream<Leg<Computed>> walkOfGuard(int number) {
-        Guard guard = room.guards().get(number);
+    Stream<Leg<Computed>> walkOf(Guard guard) {
         Leg<Computed> firstLeg = firstLegOf(guard);
 
         return Stream.iterate(
@@ -30,14 +29,12 @@ class Patrol {
                 });
     }
 
-    Stream<Room.Position> positionsVisitedByGuard(int number) {
-        var guard = room.guards().get(number);
+    Stream<Room.Position> positionsVisitedBy(Guard guard) {
         var firstElement = 1;
 
         return Stream.concat(
                 Stream.of(guard.startPosition()),
-                walkOfGuard(number)
-                    .flatMap(leg -> leg.positions().skip(firstElement))
+                walkOf(guard).flatMap(leg -> leg.positions().skip(firstElement))
         );
     }
 

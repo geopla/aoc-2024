@@ -164,19 +164,20 @@ reasonable. But when using that interface type in collections, type safety error
 
 ### Domain Language and Concepts
 - **Guard:** patrols a lab (back in year 1518)
-- **Laboratory:**  a room the guard patrols
-- **Patrol Protocol:** Rules of movement - might be dependent on the current year?
+- **Laboratory:**  aka **Room** the guard patrols
+- **Patrol Protocol:** Rules of movement (strategy) - might be dependent on the current year?
 - **Obstruction:** changes the direction of the guards movement  
 - **Position:** Position of guard or obstacles, cartesian coordinates
-- **Coordinates**: expressed as tupel `(x, y)`; direction from left to right (x) and top to bottom (y)
+- **Coordinates**: expressed as tupel `(x, y)`; direction from left to right (x) and top to bottom (y) aka screen coordinates
 - **Direction:** cardinal direction, north, east, south, west; iteration order clockwise
 - **Walk:** a path consisting of a sequence of legs, a guard takes
 - **Leg:** a straight part of walk, having a length given in steps
 - **Step:** a position change
 
 ### The problems to solve
+Just reasoning ...
 
-### Movement of the guard
+#### Guard Movement
 - steps into a direction
   - number of steps into one direction might be limited 
 - direction modeled as cardinal points gives us the opportunity to extend to diagonal moves too
@@ -192,3 +193,9 @@ reasonable. But when using that interface type in collections, type safety error
 ## Laboratory
 - rectangular, dimension?
 - obstacles are quite sparse
+
+
+## Lessons learned
+- upfront thinking and bottom up design/implementation shines when the shit hits the fan
+- unit test meticulous, don't get sloppy
+- invest in readability

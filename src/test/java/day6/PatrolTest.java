@@ -22,8 +22,9 @@ class PatrolTest {
                 ......""");
 
         var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
 
-        assertThat(patrol.walkOfGuard(0)).containsExactly(
+        assertThat(patrol.walkOf(guard)).containsExactly(
            new Leg<>(new Position(3, 2), NORTH, 2, new Computed(BORDER))
         );
     }
@@ -38,8 +39,9 @@ class PatrolTest {
                 ......""");
 
         var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
 
-        assertThat(patrol.positionsVisitedByGuard(0)).containsExactly(
+        assertThat(patrol.positionsVisitedBy(guard)).containsExactly(
           new Position(3, 2),
           new Position(3, 1),
           new Position(3, 0)
@@ -56,8 +58,9 @@ class PatrolTest {
                 ......""");
 
         var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
 
-        assertThat(patrol.walkOfGuard(0)).containsExactly(
+        assertThat(patrol.walkOf(guard)).containsExactly(
                 new Leg<>(new Position(3, 2), NORTH, 1, new Computed(OBSTRUCTION)),
                 new Leg<>(new Position(3, 1), EAST, 2, new Computed(BORDER))
         );
@@ -73,8 +76,9 @@ class PatrolTest {
                 ......""");
 
         var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
 
-        assertThat(patrol.positionsVisitedByGuard(0)).containsExactly(
+        assertThat(patrol.positionsVisitedBy(guard)).containsExactly(
                 // leg 1
                 new Position(3, 2),
                 new Position(3, 1),
@@ -94,8 +98,9 @@ class PatrolTest {
                 ....#.""");
 
         var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
 
-        assertThat(patrol.walkOfGuard(0)).containsExactly(
+        assertThat(patrol.walkOf(guard)).containsExactly(
                 new Leg<>(new Position(3, 2), NORTH, 1, new Computed(OBSTRUCTION)),
                 new Leg<>(new Position(3, 1), EAST,  1, new Computed(OBSTRUCTION)),
                 new Leg<>(new Position(4, 1), SOUTH, 1, new Computed(OBSTRUCTION)),
@@ -114,8 +119,9 @@ class PatrolTest {
                 ....#.""");
 
         var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
 
-        assertThat(patrol.positionsVisitedByGuard(0)).containsExactly(
+        assertThat(patrol.positionsVisitedBy(guard)).containsExactly(
                 // leg 0 - north
                 new Position(3, 2),
                 new Position(3, 1),
