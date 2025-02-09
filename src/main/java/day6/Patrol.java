@@ -3,7 +3,6 @@ package day6;
 import day6.Lifecycle.Computed;
 import day6.Lifecycle.Planned;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -70,7 +69,7 @@ class Patrol {
                 .boxed()
                 .map(i -> new Room.Position(i, lineNumber))
                 .map(position -> {
-                    String marker = "-";
+                    String marker = ".";
 
                     if (visitedPositions.contains(position)) {
                         marker = "X";

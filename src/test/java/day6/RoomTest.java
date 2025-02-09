@@ -10,11 +10,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static day6.CardinalDirection.*;
@@ -257,5 +256,36 @@ class RoomTest {
         var roomInputStream = Room.class.getResourceAsStream(name);
 
         return new InputStreamReader(roomInputStream, StandardCharsets.UTF_8);
+    }
+
+    @ParameterizedTest
+    @MethodSource("recognizeValidRoomTiles")
+    @DisplayName("Should recognize valid room tiles")
+    void shouldRecognizeValidInputTiles(int codePoint, Room.Tile expectedTile) {
+        Optional<Room.Tile> actualTile = Room.tileFrom(codePoint);
+
+        assertThat(actualTile).contains(expectedTile);
+    }
+
+    static Stream<Arguments> recognizeValidRoomTiles() {
+        return Stream.of(
+           arguments(Character.codePointAt(".", 0), Room.Tile.EMPTY)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("rejectInvalidRoomTiles")
+    @DisplayName("Should reject invalid room tiles")
+    void shouldRejectInvalidInputTiles(int codePoint) {
+        assertThat(Room.tileFrom(codePoint)).isEmpty();
+    }
+
+    static Stream<Arguments> rejectInvalidRoomTiles() {
+        return Stream.of(
+                arguments(Character.codePointAt("*", 0)),
+                arguments(Character.codePointAt(" ", 0)),
+                arguments(Character.codePointAt("\n", 0)),
+                arguments(Character.codePointAt("\r", 0))
+        );
     }
 }

@@ -1,7 +1,5 @@
 package day6;
 
-import static day6.CardinalDirection.NORTH;
-
 class Guard {
 
     private final Room room;

@@ -7,20 +7,69 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.IntConsumer;
 import java.util.function.Predicate;
 
-import static day6.CardinalDirection.*;
+import static day6.CardinalDirection.EAST;
+import static day6.CardinalDirection.NORTH;
+import static day6.CardinalDirection.SOUTH;
+import static day6.CardinalDirection.WEST;
 import static day6.Terminator.BORDER;
 import static day6.Terminator.OBSTRUCTION;
 import static java.util.Collections.unmodifiableList;
 
 class Room {
 
-    record Size(int width, int length) { }
-    record Position(int x, int y) { }
-    record Obstruction(char type, Position position) { }
+    record Size(int width, int length) {
+    }
+
+    record Position(int x, int y) {
+    }
+
+    record Obstruction(char type, Position position) {
+    }
+
+    enum Tile {
+        EMPTY {
+            @Override
+            char symbol() {
+                return '.';
+            }
+        },
+        OBSTRUCTION {
+            @Override
+            char symbol() {
+                return '#';
+            }
+        },
+        GUARD_FACING_NORTH {
+            @Override
+            char symbol() {
+                return '^';
+            }
+        },
+        GUARD_FACING_EAST {
+            @Override
+            char symbol() {
+                return '>';
+            }
+        },
+        GUARD_FACING_SOUTH {
+            @Override
+            char symbol() {
+                return 'v';
+            }
+        },
+        GUARD_FACING_WEST {
+            @Override
+            char symbol() {
+                return '<';
+            }
+        }
+        ;
+        abstract char symbol();
+    }
 
     private int width = 0;
     private int depth = 0;
@@ -108,7 +157,8 @@ class Room {
                 .filter(obstructionsToTheSouthFrom(start))
                 .min(Comparator.comparingInt(o -> o.position.y))
                 .map(stepsToSouthernObstruction(start))
-                .orElse(stepsToBorder);;
+                .orElse(stepsToBorder);
+        ;
 
         return new Leg<>(
                 start,
@@ -173,55 +223,87 @@ class Room {
     }
 
     private void initializeFrom(Reader input) {
-        Room thisRoom = this;
+        // dirty trick to make it accessible to the consumer
         final int[] lastCodePoint = new int[1];
 
-        Map.codePoints(input).forEach(new IntConsumer() {
-            @Override
-            public void accept(int codePoint) {
-                lastCodePoint[0] = codePoint;
+        Map.codePoints(input).forEach(codePoint -> {
+            lastCodePoint[0] = codePoint;
 
-                if (isBorder(codePoint)) {
-                    increaseLength();
-                    increaseWidthOnDemand();
-                }
-                else if (isObstruction(codePoint)) {
-                    obstructions.add(new Obstruction((char) codePoint, new Position(currentX, depth)));
-                    ++currentX;
-                }
-                else if (isGuard(codePoint)) {
-                    guards.add(new Guard(thisRoom, new Position(currentX, depth), (char) codePoint));
-                    ++currentX;
-                }
-                else {
-                    ++currentX;
-                }
+            Optional<Tile> tile = tileFrom(codePoint);
+
+            if (tile.isPresent()) {
+                evaluate(tile.get());
+            }
+            else {
+                evaluateNonTile(codePoint);
             }
         });
 
-        if (!isBorder(lastCodePoint[0])) {
-            increaseLength();
+        // handle missing new line (EOF when reading from file or closing """ on same linen when reading from text block)
+        if (!isEndOfLine(lastCodePoint[0])) {
+            increaseDepth();
         }
     }
 
-    private void increaseLength() {
+    void evaluate(Tile tile) {
+        switch (tile) {
+            case EMPTY -> {
+                ++currentX;
+            }
+            case OBSTRUCTION -> {
+                obstructions.add(new Obstruction(Tile.OBSTRUCTION.symbol(), new Position(currentX, depth)));
+                ++currentX;
+            }
+            case GUARD_FACING_NORTH -> {
+                guards.add(new Guard(this, new Position(currentX, depth), Tile.GUARD_FACING_NORTH.symbol()));
+                ++currentX;
+            }
+            case GUARD_FACING_EAST -> {
+                guards.add(new Guard(this, new Position(currentX, depth), Tile.GUARD_FACING_EAST.symbol()));
+                ++currentX;
+            }
+            case GUARD_FACING_SOUTH -> {
+                guards.add(new Guard(this, new Position(currentX, depth), Tile.GUARD_FACING_SOUTH.symbol()));
+                ++currentX;
+            }
+            case GUARD_FACING_WEST -> {
+                guards.add(new Guard(this, new Position(currentX, depth), Tile.GUARD_FACING_WEST.symbol()));
+                ++currentX;
+            }
+        }
+    }
+
+    static Optional<Tile> tileFrom(int codePoint) {
+        return switch ((char) codePoint) {
+            case '.' -> Optional.of(Tile.EMPTY);
+            case '#' -> Optional.of(Tile.OBSTRUCTION);
+            case '^' -> Optional.of(Tile.GUARD_FACING_NORTH);
+            case '>' -> Optional.of(Tile.GUARD_FACING_EAST);
+            case 'v' -> Optional.of(Tile.GUARD_FACING_SOUTH);
+            case '<' -> Optional.of(Tile.GUARD_FACING_WEST);
+
+            default -> Optional.empty();
+        };
+    }
+
+    void evaluateNonTile(int codePoint) {
+        if (isEndOfLine(codePoint)) {
+            increaseWidthToMax();
+            increaseDepth();
+        }
+    }
+
+    private static boolean isEndOfLine(int codePoint) {
+        // ignoring '\r' on WinDOS systems works just fine
+        return codePoint == '\n';
+    }
+
+    private void increaseDepth() {
         ++depth;
     }
 
-    private void increaseWidthOnDemand() {
+    private void increaseWidthToMax() {
         width = Math.max(width, currentX);
         currentX = 0;
-    }
-
-    boolean isObstruction(int type) {
-        return type == '#';
-    }
-
-    boolean isGuard(int type) {
-        return type == '^';
-    }
-
-    boolean isBorder(int type) {
-        return type == '\n';
     }
 }

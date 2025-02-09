@@ -7,6 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
 import static day6.CardinalDirection.*;
 import static day6.Terminator.BORDER;
 import static day6.Terminator.OBSTRUCTION;
@@ -94,9 +98,9 @@ class PatrolTest {
     @DisplayName("Should layout walk with MULTIPLE obstructions in room")
     void shouldLayoutWalkWithMultipleObstructionsInRoom() {
         var room = Room.from("""
-                ._.#..
-                ._.__#
-                #__^_.
+                ...#..
+                .....#
+                #..^..
                 ....#.""");
 
         var patrol = new Patrol(room);
@@ -115,9 +119,9 @@ class PatrolTest {
     @DisplayName("Should provide positions of walk in room with multiple obstructions")
     void shouldProvidePositionsOfWalkInRoomWithMultipleObstructions() {
         var room = Room.from("""
-                ._.#..
-                ._.__#
-                #__^_.
+                ...#..
+                .....#
+                #..^..
                 ....#.""");
 
         var patrol = new Patrol(room);
@@ -146,9 +150,9 @@ class PatrolTest {
     void shouldProvideDistinctPositionsVisited() {
         var room = Room.from("""
                 ..#....
-                ..xxxx#
+                ......#
                 ..x..x.
-                xxxxxx.
+                .......
                 ..^..#.""");
 
         var patrol = new Patrol(room);
@@ -183,10 +187,10 @@ class PatrolTest {
 
     @ParameterizedTest
     @CsvSource({
-            "0, '---#--'",
-            "1, '---XXX'",
-            "2, '---X--'",
-            "3, '------'",
+            "0, '...#..'",
+            "1, '...XXX'",
+            "2, '...X..'",
+            "3, '......'",
     })
     @DisplayName("Should mark visits in within a line")
     void shouldMarkVisitsInLine(int lineNumber, String expectedLine) {
@@ -204,7 +208,7 @@ class PatrolTest {
 
     @Test
     @DisplayName("Should format visited positions to readable output")
-    void shouldFormatToReadableOutput() {
+    void shouldFormatVisitedPositions() {
         var room = Room.from("""
                 ...#..
                 ......
@@ -217,9 +221,45 @@ class PatrolTest {
         String visits = patrol.visitsInLinesBy(guard);
 
         assertThat(visits).isEqualTo("""
-                ---#--
-                ---XXX
-                ---X--
-                ------""");
+                ...#..
+                ...XXX
+                ...X..
+                ......""");
+    }
+
+    @Test
+    @DisplayName("Should format visited positions from challenge example")
+    void shouldFormatVisitedPositionsFromExampleInput() {
+        var room = roomFromResource("day6-example-input.txt");
+
+        var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
+
+        String visits = patrol.visitsInLinesBy(guard);
+
+        assertThat(visits).isEqualTo("""
+                ....#.....
+                ....XXXXX#
+                ....X...X.
+                ..#.X...X.
+                ..XXXXX#X.
+                ..X.X.X.X.
+                .#XXXXXXX.
+                .XXXXXXX#.
+                #XXXXXXX..
+                ......#X..""");
+    }
+
+    Room roomFromResource(String name) {
+        Room room = null;
+
+        try (var roomInputStream = Room.class.getResourceAsStream(name)) {
+            room = Room.from(new InputStreamReader(roomInputStream, StandardCharsets.UTF_8));
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return room;
     }
 }
