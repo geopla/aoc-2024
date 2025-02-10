@@ -20,7 +20,7 @@ class Patrol {
 
         return Stream.iterate(
                 firstLeg,
-                computedLeg -> computedLeg.steps() != 0,
+                computedLeg -> computedLeg.steps() != 0,  // TODO extend for loops: 'and legs end is NOT a border'
                 leg -> {
                     var start = leg.end();
                     var direction = guard.turnStrategy()
