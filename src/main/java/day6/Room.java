@@ -1,6 +1,7 @@
 package day6;
 
 import day6.Lifecycle.Computed;
+import day6.Lifecycle.Planned;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -90,7 +91,7 @@ class Room {
         initializeFrom(input);
     }
 
-    Leg<Computed> realize(Leg<Lifecycle.Planned> legPlanned) {
+    Leg<Computed> realize(Leg<Planned> legPlanned) {
         return switch (legPlanned.direction()) {
             case NORTH -> realizeToNorth(legPlanned.start(), legPlanned.steps());
             case EAST -> realizeToEast(legPlanned.start(), legPlanned.steps());

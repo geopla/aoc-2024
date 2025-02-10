@@ -185,6 +185,81 @@ class PatrolTest {
         );
     }
 
+    @Test
+    @DisplayName("Should provide DISTINCT positions from challenge example")
+    void shouldProvideDistinctPositionsFromChallengeExample() {
+        var room = roomFromResource("day6-example-input.txt");
+
+        var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
+
+        assertThat(patrol.distinctPositionsVisitedBy(guard)).containsExactly(
+                // start
+                new Position(4, 6),
+
+                new Position(4, 5),
+                new Position(4, 4),
+                new Position(4, 3),
+                new Position(4, 2),
+                new Position(4, 1),
+
+                new Position(5, 1),
+                new Position(6, 1),
+                new Position(7, 1),
+                new Position(8, 1),
+
+                new Position(8, 2),
+                new Position(8, 3),
+                new Position(8, 4),
+                new Position(8, 5),
+                new Position(8, 6),
+
+                new Position(7, 6),
+                new Position(6, 6),
+                new Position(5, 6),
+                new Position(3, 6),
+                new Position(2, 6),
+
+                new Position(2, 5),
+                new Position(2, 4),
+
+                new Position(3, 4),
+                new Position(5, 4),
+                new Position(6, 4),
+
+                new Position(6, 5),
+                new Position(6, 7),
+                new Position(6, 8),
+
+                new Position(5, 8),
+                new Position(4, 8),
+                new Position(3, 8),
+                new Position(2, 8),
+                new Position(1, 8),
+
+                new Position(1, 7),
+                new Position(2, 7),
+                new Position(3, 7),
+                new Position(4, 7),
+                new Position(5, 7),
+                new Position(7, 7),
+
+                new Position(7, 8),
+                new Position(7, 9)
+        );
+    }
+
+    @Test
+    @DisplayName("Should count distinct positions from challenge example")
+    void shouldCountDistinctPositionsFromChallengeExample() {
+        var room = roomFromResource("day6-example-input.txt");
+
+        var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
+
+        assertThat(patrol.distinctPositionsCountVisitedBy(guard)).isEqualTo(41);
+    }
+
     @ParameterizedTest
     @CsvSource({
             "0, '...#..'",
@@ -229,7 +304,7 @@ class PatrolTest {
 
     @Test
     @DisplayName("Should format visited positions from challenge example")
-    void shouldFormatVisitedPositionsFromExampleInput() {
+    void shouldFormatVisitedPositionsFromChallengeExample() {
         var room = roomFromResource("day6-example-input.txt");
 
         var patrol = new Patrol(room);
@@ -255,8 +330,7 @@ class PatrolTest {
 
         try (var roomInputStream = Room.class.getResourceAsStream(name)) {
             room = Room.from(new InputStreamReader(roomInputStream, StandardCharsets.UTF_8));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

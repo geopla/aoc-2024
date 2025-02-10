@@ -197,5 +197,6 @@ Just reasoning ...
 
 ## Lessons learned
 - upfront thinking and bottom up design/implementation shines when the shit hits the fan
-- unit test meticulous, don't get sloppy
-- invest in readability
+- unit test meticulously, don't get sloppy
+- invest in readability, especially when using functional style
+- reading a file as stream as a whole is not worth the hassle, just use BufferedReader.lines() instead

@@ -44,6 +44,10 @@ class Patrol {
         return positionsVisitedBy(guard).distinct();
     }
 
+    long distinctPositionsCountVisitedBy(Guard guard) {
+        return distinctPositionsVisitedBy(guard).count();
+    }
+
     private static CardinalDirection keepDirectionWhenGuardIsStuckOn(Leg<Computed> leg) {
         return leg.direction();
     }
