@@ -260,6 +260,17 @@ class PatrolTest {
         assertThat(patrol.distinctPositionsCountVisitedBy(guard)).isEqualTo(41);
     }
 
+    @Test
+    @DisplayName("Should count distinct positions from challenge")
+    void shouldCountDistinctPositionsFromChallenge() {
+        var room = roomFromResource("day6-input.txt");
+
+        var patrol = new Patrol(room);
+        var guard = room.guards().getFirst();
+
+        assertThat(patrol.distinctPositionsCountVisitedBy(guard)).isEqualTo(4776);
+    }
+
     @ParameterizedTest
     @CsvSource({
             "0, '...#..'",
