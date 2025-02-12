@@ -11,11 +11,133 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class GuardTest {
 
     Lifecycle.Computed hitsObstruction = new Lifecycle.Computed(Terminator.OBSTRUCTION);
+    Lifecycle.Computed hitsRoomBorder = new Lifecycle.Computed(Terminator.BORDER);
+
+    @Test
+    @DisplayName("")
+    void shouldWalkStraightToBorderInEmptyRoom() {
+        var room = Room.from("""
+                ......
+                ......
+                ...^..
+                ......""");
+
+        var guard = room.guards().getFirst();
+
+        assertThat(guard.walk().legs()).containsExactly(
+                  new Leg<>(new Room.Position(3, 2), NORTH, 2, hitsRoomBorder)
+        );
+    }
+
+    @Test
+    @DisplayName("Should provide position sequence of walk straight to border in empty room")
+    void shouldProvidePositionsOfWalkStraightToBorderInEmptyRoom() {
+        var room = Room.from("""
+                ......
+                ......
+                ...^..
+                ......""");
+
+        var guard = room.guards().getFirst();
+
+        assertThat(guard.walk().positionsVisited()).containsExactly(
+                new Room.Position(3, 2),
+                new Room.Position(3, 1),
+                new Room.Position(3, 0)
+        );
+    }
+
+    @Test
+    @DisplayName("Should walk with a SINGLE obstruction on path")
+    void shouldWalkAvoidingSingleObstruction() {
+        var room = Room.from("""
+                ...#..
+                ......
+                ...^..
+                ......""");
+
+        var guard = room.guards().getFirst();
+
+        assertThat(guard.walk().legs()).containsExactly(
+                new Leg<>(new Room.Position(3, 2), NORTH, 1, hitsObstruction),
+                new Leg<>(new Room.Position(3, 1), EAST, 2, hitsRoomBorder)
+        );
+    }
+
+    @Test
+    @DisplayName("Should provide position sequence of walk with a SINGLE obstruction on the path")
+    void shouldProvidePositionsOfWalkWithSingleObstructionOnPath() {
+        var room = Room.from("""
+                ...#..
+                ......
+                ...^..
+                ......""");
+
+        var guard = room.guards().getFirst();
+
+        assertThat(guard.walk().positionsVisited()).containsExactly(
+                // leg 1
+                new Room.Position(3, 2),
+                new Room.Position(3, 1),
+                // leg 2
+                new Room.Position(4, 1),
+                new Room.Position(5, 1)
+        );
+    }
+
+    @Test
+    @DisplayName("Should walk with MULTIPLE obstructions on the path")
+    void shouldWalkWithMultipleObstructionsOnPath() {
+        var room = Room.from("""
+                ...#..
+                .....#
+                #..^..
+                ....#.""");
+
+        var guard = room.guards().getFirst();
+
+        assertThat(guard.walk().legs()).containsExactly(
+                new Leg<>(new Room.Position(3, 2), NORTH, 1, hitsObstruction),
+                new Leg<>(new Room.Position(3, 1), EAST,  1, hitsObstruction),
+                new Leg<>(new Room.Position(4, 1), SOUTH, 1, hitsObstruction),
+                new Leg<>(new Room.Position(4, 2), WEST,  3, hitsObstruction),
+                new Leg<>(new Room.Position(1, 2), NORTH, 2, hitsRoomBorder)
+        );
+    }
+
+    @Test
+    @DisplayName("Should provide position sequence of walk with MULTIPLE obstructions on the path")
+    void shouldProvidePositionsOfWalkWithMultipleObstructions() {
+        var room = Room.from("""
+                ...#..
+                .....#
+                #..^..
+                ....#.""");
+
+        var guard = room.guards().getFirst();
+
+        assertThat(guard.walk().positionsVisited()).containsExactly(
+                // leg 0 - north
+                new Room.Position(3, 2),
+                new Room.Position(3, 1),
+                // leg 1 - east
+                new Room.Position(4, 1),
+                // leg 2 - south
+                new Room.Position(4, 2),
+                // leg 3 - west
+                new Room.Position(3, 2),
+                new Room.Position(2, 2),
+                new Room.Position(1, 2),
+                // leg 5 - north
+                new Room.Position(1, 1),
+                new Room.Position(1, 0)
+        );
+    }
 
     @Test
     @DisplayName("Should accept a leg starting a guard walk")
     void shouldAcceptAnInitialLeg() {
-        var walk = new Guard.Walk();
+        var walk = new Guard.Walk(new Room.Position(0, 0));
         var leg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
 
         assertThat(walk.add(leg)).isTrue();
@@ -25,7 +147,7 @@ class GuardTest {
     @Test
     @DisplayName("Should accept another leg connected to a guard walk")
     void shouldAcceptAnotherConnectedLeg() {
-        var walk = new Guard.Walk();
+        var walk = new Guard.Walk(new Room.Position(0, 0));
 
         var startLeg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
         walk.add(startLeg);
@@ -42,7 +164,7 @@ class GuardTest {
     @Test
     @DisplayName("Should reject another NOT connected leg (for safety reasons)")
     void shouldRejectAnotherNotConnectedLeg() {
-        var walk = new Guard.Walk();
+        var walk = new Guard.Walk(new Room.Position(0, 0));
 
         var startLeg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
         walk.add(startLeg);
@@ -58,7 +180,7 @@ class GuardTest {
     @Test
     @DisplayName("Should ignore a looping leg (without throwing an exception)")
     void shouldIngnoreLoopingLeg() {
-        var walk = new Guard.Walk();
+        var walk = new Guard.Walk(new Room.Position(0, 0));
 
         var twoStepsSouth = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
         walk.add(twoStepsSouth);
