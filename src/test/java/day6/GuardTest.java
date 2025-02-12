@@ -14,7 +14,7 @@ class GuardTest {
     Lifecycle.Computed hitsRoomBorder = new Lifecycle.Computed(Terminator.BORDER);
 
     @Test
-    @DisplayName("")
+    @DisplayName("Should walk straight to border in empty room")
     void shouldWalkStraightToBorderInEmptyRoom() {
         var room = Room.from("""
                 ......
@@ -135,10 +135,34 @@ class GuardTest {
     }
 
     @Test
+    @DisplayName("Should obey limit of maximum number of legs in a guard walk")
+    void shouldObeyLegsLimitMax() {
+        var room = Room.from("""
+                ...#..
+                .....#
+                #..^..
+                ....#.""");
+
+        var guard = room.guards().getFirst();
+        guard.legsLimit(2);
+
+        assertThat(guard.walk().legs()).containsExactly(
+                new Leg<>(new Room.Position(3, 2), NORTH, 1, hitsObstruction),
+                new Leg<>(new Room.Position(3, 1), EAST,  1, hitsObstruction)
+        );
+    }
+
+    @Test
     @DisplayName("Should accept a leg starting a guard walk")
     void shouldAcceptAnInitialLeg() {
-        var walk = new Guard.Walk(new Room.Position(0, 0));
-        var leg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
+        var room = Room.from("""
+                v..
+                ...
+                ...""");
+
+        var guard = room.guards().getFirst();
+        var walk = new Guard.Walk(guard);
+        var leg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsRoomBorder);
 
         assertThat(walk.add(leg)).isTrue();
         assertThat(walk.legs()).containsExactly(leg);
@@ -147,12 +171,18 @@ class GuardTest {
     @Test
     @DisplayName("Should accept another leg connected to a guard walk")
     void shouldAcceptAnotherConnectedLeg() {
-        var walk = new Guard.Walk(new Room.Position(0, 0));
+        var room = Room.from("""
+                v..
+                ...
+                #..""");
 
-        var startLeg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
+        var guard = room.guards().getFirst();
+        var walk = new Guard.Walk(guard);
+
+        var startLeg = new Leg<>(new Room.Position(0, 0), SOUTH, 1, hitsObstruction);
         walk.add(startLeg);
 
-        var connectedLeg = new Leg<>(new Room.Position(0, 2), EAST, 3, hitsObstruction);
+        var connectedLeg = new Leg<>(new Room.Position(0, 1), EAST, 2, hitsRoomBorder);
         walk.add(connectedLeg);
 
         assertThat(walk.legs()).containsExactly(
@@ -164,37 +194,54 @@ class GuardTest {
     @Test
     @DisplayName("Should reject another NOT connected leg (for safety reasons)")
     void shouldRejectAnotherNotConnectedLeg() {
-        var walk = new Guard.Walk(new Room.Position(0, 0));
+        var room = Room.from("""
+                v..
+                ...
+                ...""");
+
+        var guard = room.guards().getFirst();
+        var walk = new Guard.Walk(guard);
 
         var startLeg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
         walk.add(startLeg);
 
-        var unconnectedLeg = new Leg<>(new Room.Position(1, 3), EAST, 2, hitsObstruction);
+        var unconnectedLeg = new Leg<>(new Room.Position(1, 1), EAST, 1, hitsRoomBorder);
 
         assertThatIllegalArgumentException().isThrownBy(() ->
                         walk.add(unconnectedLeg)
                 )
-                .withMessage("end Position[x=0, y=2] not connected to start Position[x=1, y=3]");
+                .withMessage("end Position[x=0, y=2] not connected to start Position[x=1, y=1]");
     }
 
     @Test
     @DisplayName("Should ignore a looping leg (without throwing an exception)")
-    void shouldIngnoreLoopingLeg() {
-        var walk = new Guard.Walk(new Room.Position(0, 0));
+    void shouldIgnoreLoopingLeg() {
+        var room = Room.from("""
+                ####.
+                >...#
+                .....
+                .#...
+                ...#.
+                """);
 
-        var twoStepsSouth = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
-        walk.add(twoStepsSouth);
+        var guard = room.guards().getFirst();
+        var walk = new Guard.Walk(guard);
 
-        var twoStepsEast = new Leg<>(new Room.Position(0, 2), EAST, 2, hitsObstruction);
-        walk.add(twoStepsEast);
+        var toEast  = new Leg<>(new Room.Position(0, 1), EAST,  3, hitsObstruction);
+        var toSouth = new Leg<>(new Room.Position(3, 1), SOUTH, 2, hitsObstruction);
+        var toWest  = new Leg<>(new Room.Position(3, 3), WEST,  1, hitsObstruction);
+        var toNorth = new Leg<>(new Room.Position(2, 3), NORTH, 2, hitsObstruction);
 
-        var twoStepsNorth = new Leg<>(new Room.Position(2, 2), NORTH, 2, hitsObstruction);
-        walk.add(twoStepsNorth);
+        var toEastAgainPartial = new Leg<>(new Room.Position(2, 1), EAST, 2, hitsObstruction);
+        var toSouthAgainComplete = new Leg<>(new Room.Position(3, 1), SOUTH, 2, hitsObstruction);
 
-        var twoStepsWest = new Leg<>(new Room.Position(2, 0), WEST, 3, hitsObstruction);
-        walk.add(twoStepsWest);
+        assertThat(walk.add(toEast)).isTrue();
+        assertThat(walk.add(toSouth)).isTrue();
+        assertThat(walk.add(toWest)).isTrue();
+        assertThat(walk.add(toNorth)).isTrue();
 
-        assertThat(walk.add(twoStepsSouth)).isFalse();
+        assertThat(walk.add(toEastAgainPartial)).isTrue();
+        assertThat(walk.add(toSouthAgainComplete)).isFalse();
     }
 
     @Test

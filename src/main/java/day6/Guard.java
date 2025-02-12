@@ -5,17 +5,21 @@ import day6.Lifecycle.Planned;
 import day6.Room.Position;
 
 import java.util.LinkedHashSet;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static day6.Terminator.BORDER;
 
 class Guard {
 
     static class Walk {
         private final LinkedHashSet<Leg<Computed>> legs;
-        private final Position startPosition;
 
-        Walk(Position startPosition) {
+        private final Guard guard;
+
+        Walk(Guard guard) {
+            this.guard = guard;
             this.legs = new LinkedHashSet<>();
-            this.startPosition = startPosition;
         }
 
         boolean add(Leg<Computed> leg) {
@@ -31,7 +35,7 @@ class Guard {
             var firstElement = 1;
 
             return Stream.concat(
-                    Stream.of(startPosition),
+                    Stream.of(guard.startPosition),
                     legs.stream()
                             .flatMap(leg -> leg.positions().skip(firstElement))
             );
@@ -42,11 +46,12 @@ class Guard {
                 var lastLegEnd = legs.getLast().end();
                 var newLegStart = leg.start();
 
-                if (! newLegStart.equals(lastLegEnd)) {
+                if (!newLegStart.equals(lastLegEnd)) {
                     throw new IllegalArgumentException("end %s not connected to start %s".formatted(lastLegEnd, newLegStart));
                 }
             }
         }
+
         private boolean isNotEmptyWalk() {
             return !legs.isEmpty();
         }
@@ -61,8 +66,8 @@ class Guard {
     private final CardinalDirection startFacing;
 
     private final TurnStrategy turnStrategy;
+    private int legsLimitMax = Integer.MAX_VALUE;
     private final Walk walk;
-
 
     Guard(Room room, Position position, char facing) {
         this.room = room;
@@ -71,7 +76,7 @@ class Guard {
 
         // may be configurable in future
         turnStrategy = new TurnRight();
-        walk = new Walk(startPosition);
+        walk = new Walk(this);
 
         if (room == null) {
             throw new IllegalArgumentException("guard must be assigned to a room");
@@ -90,20 +95,39 @@ class Guard {
 
         Leg<Computed> firstLeg = firstLeg();
 
-        Stream.iterate(
-                firstLeg,
-                computedLeg -> computedLeg.steps() != 0,  // TODO extend for loops: 'and legs end is NOT a border'
-                leg -> {
-                    var start = leg.end();
-                    var direction = turnStrategy
-                            .changeDirectionOn(leg)
-                            .orElse(keepDirectionWhenGuardIsStuckOn(leg));
+        Stream.iterate(firstLeg,
+                        hasNextLeg(),  // TODO extend for loops: 'and legs end is NOT a border'
+                        leg -> {
+                            var start = leg.end();
+                            var direction = turnStrategy
+                                    .changeDirectionOn(leg)
+                                    .orElse(keepDirectionWhenGuardIsStuckOn(leg));
 
-                    return room.realize(new Leg<>(start, direction, Leg.stepsUnlimited(), new Planned()));
-                })
+                            return room.realize(new Leg<>(start, direction, Leg.stepsUnlimited(), new Planned()));
+                        })
                 .forEach(walk::add);
 
         return walk;
+    }
+
+    private Predicate<Leg<Computed>> hasNextLeg() {
+
+        return computedLeg -> {
+            // safety catch, limited number of legs because of possible loops
+            if (walk.legs.size() >= legsLimitMax) {
+                return false;
+            }
+
+            if (computedLeg.steps() == 0) {
+                if (computedLeg.state().terminator() == BORDER) {
+                    return false;
+                }
+            }
+
+            // TODO loop entered
+
+            return true;
+        };
     }
 
     private Leg<Computed> firstLeg() {
@@ -128,5 +152,9 @@ class Guard {
 
     TurnStrategy turnStrategy() {
         return turnStrategy;
+    }
+
+    void legsLimit(int max) {
+        legsLimitMax = max;
     }
 }
