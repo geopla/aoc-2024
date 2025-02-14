@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -20,10 +21,44 @@ import static day6.CardinalDirection.*;
 import static day6.Terminator.BORDER;
 import static day6.Terminator.OBSTRUCTION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class RoomTest {
+
+    @Test
+    @DisplayName("Should allow placing obstructions after room is parsed from input")
+    void shouldAllowObstructionPlacingAfterwards() {
+        var room = Room.from("""
+                ......
+                ..^...
+                ......
+                ......""");
+
+        var additionalObstruction = new Room.Obstruction('#', new Position(0, 2));
+
+        Room modifiedRoom = room.withAdditional(List.of(additionalObstruction));
+
+        assertThat(modifiedRoom.obstructions()).contains(additionalObstruction);
+    }
+
+    @Test
+    @DisplayName("Should not allow placing an obstruction on a guard start position")
+    void shouldNotAllowPlacingAnObstructionOntoGuard() {
+        var room = Room.from("""
+                ......
+                ..^...
+                ......
+                ......""");
+
+        var obstructionAtGuardStartPosition = new Room.Obstruction('#', new Position(2, 1));
+
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                room.withAdditional(List.of(obstructionAtGuardStartPosition))
+        )
+                .withMessage("can't place obstruction on guards position");
+    }
 
     @ParameterizedTest
     @MethodSource("realizePlannedLegInEmptyRoom")

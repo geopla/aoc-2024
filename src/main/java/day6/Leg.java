@@ -13,6 +13,13 @@ record Leg<State extends Lifecycle>(
         return Integer.MAX_VALUE;
     }
 
+    public boolean isZeroStepToBorder() {
+        return switch (state) {
+            case Lifecycle.Planned planned -> false;
+            case Lifecycle.Computed computed -> steps == 0 && computed.terminator() == Terminator.BORDER;
+        };
+    }
+
     Room.Position end() {
         return switch (direction) {
             case NORTH -> new Room.Position(start.x(), start.y() - steps);

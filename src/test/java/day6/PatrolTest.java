@@ -10,9 +10,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
+import static day6.CardinalDirection.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PatrolTest {
+
+    private Lifecycle.Computed hitsObstruction = new Lifecycle.Computed(Terminator.OBSTRUCTION);
+    private Lifecycle.Computed hitsRoomBorder = new Lifecycle.Computed(Terminator.BORDER);
 
     @Test
     @DisplayName("Should provide DISTINCT positions visited")
@@ -115,6 +119,29 @@ class PatrolTest {
 
                 new Position(7, 8),
                 new Position(7, 9)
+        );
+    }
+
+    @Test
+    @DisplayName("Should provide guard walk from challenge example")
+    void shouldProvideGuardWalkFromChallengeExample() {
+        var room = roomFromResource("day6-example-input.txt");
+        var guard = room.guards().getFirst();
+
+        var legs = guard.walk().legs();
+
+        assertThat(legs).containsExactly(
+                new Leg<>(new Position(4, 6), NORTH, 5, hitsObstruction),
+                new Leg<>(new Position(4, 1), EAST,  4, hitsObstruction),
+                new Leg<>(new Position(8, 1), SOUTH, 5, hitsObstruction),
+                new Leg<>(new Position(8, 6), WEST,  6, hitsObstruction),
+                new Leg<>(new Position(2, 6), NORTH, 2, hitsObstruction),
+                new Leg<>(new Position(2, 4), EAST,  4, hitsObstruction),
+                new Leg<>(new Position(6, 4), SOUTH, 4, hitsObstruction),
+                new Leg<>(new Position(6, 8), WEST,  5, hitsObstruction),
+                new Leg<>(new Position(1, 8), NORTH, 1, hitsObstruction),
+                new Leg<>(new Position(1, 7), EAST,  6, hitsObstruction),
+                new Leg<>(new Position(7, 7), SOUTH, 2, hitsRoomBorder)
         );
     }
 

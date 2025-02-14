@@ -5,16 +5,17 @@ import day6.Lifecycle.Planned;
 import day6.Room.Position;
 
 import java.util.LinkedHashSet;
-import java.util.function.Predicate;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static day6.Terminator.BORDER;
+import static day6.Terminator.OBSTRUCTION;
 
 class Guard {
 
     static class Walk {
-        private final LinkedHashSet<Leg<Computed>> legs;
 
+        private final LinkedHashSet<Leg<Computed>> legs;
         private final Guard guard;
 
         Walk(Guard guard) {
@@ -23,8 +24,13 @@ class Guard {
         }
 
         boolean add(Leg<Computed> leg) {
+            // mainly useful for unit test but may increase confidence ;-)
             tryValidateConnectivity(leg);
             return legs.add(leg);
+        }
+
+        void clear() {
+            legs.clear();
         }
 
         Stream<Leg<Computed>> legs() {
@@ -39,6 +45,19 @@ class Guard {
                     legs.stream()
                             .flatMap(leg -> leg.positions().skip(firstElement))
             );
+        }
+
+        boolean endsInLoop() {
+            if (isNotEmptyWalk()) {
+                var lastLeg = legs.getLast();
+
+                // walk calculation stops on obstruction when a loop is detected
+                if (lastLeg.state().terminator() == OBSTRUCTION) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void tryValidateConnectivity(Leg<Computed> leg) {
@@ -60,12 +79,12 @@ class Guard {
             return !legs.contains(leg);
         }
     }
-
     private final Room room;
+
     private final Position startPosition;
     private final CardinalDirection startFacing;
-
     private final TurnStrategy turnStrategy;
+
     private int legsLimitMax = Integer.MAX_VALUE;
     private final Walk walk;
 
@@ -86,48 +105,54 @@ class Guard {
         }
     }
 
+    public boolean isRunningInLoop() {
+        return walk().endsInLoop();
+
+    }
+
     Walk walk() {
-        // TODO compute walk dependent on the room layout including historian added obstructions
-        // Step -, copy implementation from Patrol
-        // Step 2, integrate looping paths
-        // Step 3, extend room to accept historian introduced obstacles too
-        // Step -, delete walk construction from Patrol
+        // TODO while loop instead of streaming doesn't look good to me ...
 
-        Leg<Computed> firstLeg = firstLeg();
+        Leg<Computed> currentLeg = firstLeg();
+        walk.clear();
+        walk.add(currentLeg);
 
-        Stream.iterate(firstLeg,
-                        hasNextLeg(),  // TODO extend for loops: 'and legs end is NOT a border'
-                        leg -> {
-                            var start = leg.end();
-                            var direction = turnStrategy
-                                    .changeDirectionOn(leg)
-                                    .orElse(keepDirectionWhenGuardIsStuckOn(leg));
+        var noLoopDetected = true;
 
-                            return room.realize(new Leg<>(start, direction, Leg.stepsUnlimited(), new Planned()));
-                        })
-                .forEach(walk::add);
+        while (hasNext(currentLeg) && noLoopDetected) {
+            currentLeg = next(currentLeg);
+            noLoopDetected = walk.add(currentLeg);
+        }
 
         return walk;
     }
 
-    private Predicate<Leg<Computed>> hasNextLeg() {
-
-        return computedLeg -> {
+    private boolean hasNext(Leg<Computed> leg) {
             // safety catch, limited number of legs because of possible loops
             if (walk.legs.size() >= legsLimitMax) {
                 return false;
             }
+            return nextNotLeavingRoom(leg).isPresent();
+    }
 
-            if (computedLeg.steps() == 0) {
-                if (computedLeg.state().terminator() == BORDER) {
-                    return false;
-                }
-            }
+    private Optional<Leg<Computed>> nextNotLeavingRoom(Leg<Computed> leg) {
+        var nextLeg = next(leg);
 
-            // TODO loop entered
+        if (nextLeg.steps() == 0 && nextLeg.state().terminator() == BORDER) {
+            return Optional.empty();
+        }
+        else {
+            return Optional.of(nextLeg);
+        }
+    }
 
-            return true;
-        };
+    private Leg<Computed> next(Leg<Computed> leg) {
+        var start = leg.end();
+        var direction = turnStrategy
+                .changeDirectionOn(leg)
+                .orElse(keepDirectionWhenGuardIsStuckOn(leg));
+
+        return room.realize(new Leg<>(start, direction, Leg.stepsUnlimited(), new Planned()));
     }
 
     private Leg<Computed> firstLeg() {

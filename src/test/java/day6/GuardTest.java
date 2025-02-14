@@ -25,7 +25,7 @@ class GuardTest {
         var guard = room.guards().getFirst();
 
         assertThat(guard.walk().legs()).containsExactly(
-                  new Leg<>(new Room.Position(3, 2), NORTH, 2, hitsRoomBorder)
+                new Leg<>(new Room.Position(3, 2), NORTH, 2, hitsRoomBorder)
         );
     }
 
@@ -98,9 +98,9 @@ class GuardTest {
 
         assertThat(guard.walk().legs()).containsExactly(
                 new Leg<>(new Room.Position(3, 2), NORTH, 1, hitsObstruction),
-                new Leg<>(new Room.Position(3, 1), EAST,  1, hitsObstruction),
+                new Leg<>(new Room.Position(3, 1), EAST, 1, hitsObstruction),
                 new Leg<>(new Room.Position(4, 1), SOUTH, 1, hitsObstruction),
-                new Leg<>(new Room.Position(4, 2), WEST,  3, hitsObstruction),
+                new Leg<>(new Room.Position(4, 2), WEST, 3, hitsObstruction),
                 new Leg<>(new Room.Position(1, 2), NORTH, 2, hitsRoomBorder)
         );
     }
@@ -148,8 +148,67 @@ class GuardTest {
 
         assertThat(guard.walk().legs()).containsExactly(
                 new Leg<>(new Room.Position(3, 2), NORTH, 1, hitsObstruction),
-                new Leg<>(new Room.Position(3, 1), EAST,  1, hitsObstruction)
+                new Leg<>(new Room.Position(3, 1), EAST, 1, hitsObstruction)
         );
+    }
+
+    @Test
+    @DisplayName("Should TERMINATE walk with obstructions on path causing a loop")
+    void shouldWalkWithObstructionsOnPathCausingLoop() {
+        var room = Room.from("""
+                ####.
+                >...#
+                .....
+                .#...
+                ...#.
+                """);
+
+        var legsUntilEnteringLoop = 4;
+        var firstPartialLegInLoop = 1;
+        var firstFullLengthLegInLoop = 1;
+
+        var guard = room.guards().getFirst();
+        guard.legsLimit(legsUntilEnteringLoop + firstPartialLegInLoop + firstFullLengthLegInLoop);
+
+        assertThat(guard.walk().legs()).containsExactly(
+                new Leg<>(new Room.Position(0, 1), EAST,  3, hitsObstruction),
+                new Leg<>(new Room.Position(3, 1), SOUTH, 2, hitsObstruction),
+                new Leg<>(new Room.Position(3, 3), WEST,  1, hitsObstruction),
+                new Leg<>(new Room.Position(2, 3), NORTH, 2, hitsObstruction),
+
+                // partial leg is in because loop detection needs repeated full length leg
+                new Leg<>(new Room.Position(2, 1), EAST,  1, hitsObstruction)
+        );
+    }
+
+    @Test
+    @DisplayName("Should recognize a loop walk")
+    void shouldRecognizeLoopWalk() {
+        var room = Room.from("""
+                ####.
+                >...#
+                .....
+                .#...
+                ...#.
+                """);
+
+        var guard = room.guards().getFirst();
+
+        assertThat(guard.isRunningInLoop()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should not recognize a loop when leaving the room is possible")
+    void shouldNotRecognizeLoop() {
+        var room = Room.from("""
+                ...#..
+                ......
+                ...^..
+                ......""");
+
+        var guard = room.guards().getFirst();
+
+        assertThat(guard.isRunningInLoop()).isFalse();
     }
 
     @Test
@@ -214,7 +273,7 @@ class GuardTest {
     }
 
     @Test
-    @DisplayName("Should ignore a looping leg (without throwing an exception)")
+    @DisplayName("Should add a (full) looping leg to the walk")
     void shouldIgnoreLoopingLeg() {
         var room = Room.from("""
                 ####.
@@ -227,12 +286,12 @@ class GuardTest {
         var guard = room.guards().getFirst();
         var walk = new Guard.Walk(guard);
 
-        var toEast  = new Leg<>(new Room.Position(0, 1), EAST,  3, hitsObstruction);
+        var toEast = new Leg<>(new Room.Position(0, 1), EAST, 3, hitsObstruction);
         var toSouth = new Leg<>(new Room.Position(3, 1), SOUTH, 2, hitsObstruction);
-        var toWest  = new Leg<>(new Room.Position(3, 3), WEST,  1, hitsObstruction);
+        var toWest = new Leg<>(new Room.Position(3, 3), WEST, 1, hitsObstruction);
         var toNorth = new Leg<>(new Room.Position(2, 3), NORTH, 2, hitsObstruction);
 
-        var toEastAgainPartial = new Leg<>(new Room.Position(2, 1), EAST, 2, hitsObstruction);
+        var toEastAgainPartial = new Leg<>(new Room.Position(2, 1), EAST, 1, hitsObstruction);
         var toSouthAgainComplete = new Leg<>(new Room.Position(3, 1), SOUTH, 2, hitsObstruction);
 
         assertThat(walk.add(toEast)).isTrue();

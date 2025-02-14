@@ -12,10 +12,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static day6.CardinalDirection.EAST;
-import static day6.CardinalDirection.NORTH;
-import static day6.CardinalDirection.SOUTH;
-import static day6.CardinalDirection.WEST;
+import static day6.CardinalDirection.*;
 import static day6.Terminator.BORDER;
 import static day6.Terminator.OBSTRUCTION;
 import static java.util.Collections.unmodifiableList;
@@ -76,7 +73,7 @@ class Room {
     private int depth = 0;
     private int currentX = 0;
 
-    private final List<Obstruction> obstructions = new ArrayList<>();
+    private List<Obstruction> obstructions = new ArrayList<>();
     private final List<Guard> guards = new ArrayList<>();
 
     public static Room from(Reader input) {
@@ -89,6 +86,29 @@ class Room {
 
     private Room(Reader input) {
         initializeFrom(input);
+    }
+
+    Room(List<Obstruction> obstructions, List<Guard> guards) {
+        this.obstructions = obstructions;
+    }
+
+    Room withAdditional(List<Obstruction> obstructions) {
+        List<Position> obstructionPositions = obstructions.stream()
+                .map(Obstruction::position)
+                .toList();
+
+        var hitsAGuardPosition = guards.stream()
+                .map(Guard::startPosition)
+                .anyMatch(obstructionPositions::contains);
+
+        if (hitsAGuardPosition) {
+            throw new IllegalArgumentException("can't place obstruction on guards position");
+        }
+
+        var allObstructions = new ArrayList<>(this.obstructions);
+        allObstructions.addAll(obstructions);
+
+        return new Room(allObstructions, this.guards);
     }
 
     Leg<Computed> realize(Leg<Planned> legPlanned) {
