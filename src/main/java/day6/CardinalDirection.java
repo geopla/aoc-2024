@@ -11,6 +11,11 @@ enum CardinalDirection {
         CardinalDirection turnRight() {
             return EAST;
         }
+
+        @Override
+        char symbol() {
+            return '^';
+        }
     },
     EAST {
         @Override
@@ -21,6 +26,11 @@ enum CardinalDirection {
         @Override
         CardinalDirection turnRight() {
             return SOUTH;
+        }
+
+        @Override
+        char symbol() {
+            return '>';
         }
     },
     SOUTH {
@@ -33,6 +43,11 @@ enum CardinalDirection {
         CardinalDirection turnRight() {
             return WEST;
         }
+
+        @Override
+        char symbol() {
+            return 'v';
+        }
     },
     WEST {
         @Override
@@ -44,10 +59,16 @@ enum CardinalDirection {
         CardinalDirection turnRight() {
             return NORTH;
         }
+
+        @Override
+        char symbol() {
+            return '<';
+        }
     };
 
     abstract CardinalDirection turnLeft();
     abstract CardinalDirection turnRight();
+    abstract char symbol();
 
     static CardinalDirection from(char symbol) {
         return switch (symbol) {

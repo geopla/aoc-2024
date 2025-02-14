@@ -132,15 +132,15 @@ class PatrolTest {
 
         assertThat(legs).containsExactly(
                 new Leg<>(new Position(4, 6), NORTH, 5, hitsObstruction),
-                new Leg<>(new Position(4, 1), EAST,  4, hitsObstruction),
+                new Leg<>(new Position(4, 1), EAST, 4, hitsObstruction),
                 new Leg<>(new Position(8, 1), SOUTH, 5, hitsObstruction),
-                new Leg<>(new Position(8, 6), WEST,  6, hitsObstruction),
+                new Leg<>(new Position(8, 6), WEST, 6, hitsObstruction),
                 new Leg<>(new Position(2, 6), NORTH, 2, hitsObstruction),
-                new Leg<>(new Position(2, 4), EAST,  4, hitsObstruction),
+                new Leg<>(new Position(2, 4), EAST, 4, hitsObstruction),
                 new Leg<>(new Position(6, 4), SOUTH, 4, hitsObstruction),
-                new Leg<>(new Position(6, 8), WEST,  5, hitsObstruction),
+                new Leg<>(new Position(6, 8), WEST, 5, hitsObstruction),
                 new Leg<>(new Position(1, 8), NORTH, 1, hitsObstruction),
-                new Leg<>(new Position(1, 7), EAST,  6, hitsObstruction),
+                new Leg<>(new Position(1, 7), EAST, 6, hitsObstruction),
                 new Leg<>(new Position(7, 7), SOUTH, 2, hitsRoomBorder)
         );
     }

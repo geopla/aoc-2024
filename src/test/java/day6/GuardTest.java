@@ -3,6 +3,10 @@ package day6;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 import static day6.CardinalDirection.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +26,7 @@ class GuardTest {
                 ...^..
                 ......""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(guard.walk().legs()).containsExactly(
                 new Leg<>(new Room.Position(3, 2), NORTH, 2, hitsRoomBorder)
@@ -38,7 +42,7 @@ class GuardTest {
                 ...^..
                 ......""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(guard.walk().positionsVisited()).containsExactly(
                 new Room.Position(3, 2),
@@ -56,7 +60,7 @@ class GuardTest {
                 ...^..
                 ......""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(guard.walk().legs()).containsExactly(
                 new Leg<>(new Room.Position(3, 2), NORTH, 1, hitsObstruction),
@@ -73,7 +77,7 @@ class GuardTest {
                 ...^..
                 ......""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(guard.walk().positionsVisited()).containsExactly(
                 // leg 1
@@ -94,7 +98,7 @@ class GuardTest {
                 #..^..
                 ....#.""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(guard.walk().legs()).containsExactly(
                 new Leg<>(new Room.Position(3, 2), NORTH, 1, hitsObstruction),
@@ -114,7 +118,7 @@ class GuardTest {
                 #..^..
                 ....#.""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(guard.walk().positionsVisited()).containsExactly(
                 // leg 0 - north
@@ -143,7 +147,7 @@ class GuardTest {
                 #..^..
                 ....#.""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
         guard.legsLimit(2);
 
         assertThat(guard.walk().legs()).containsExactly(
@@ -167,7 +171,7 @@ class GuardTest {
         var firstPartialLegInLoop = 1;
         var firstFullLengthLegInLoop = 1;
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
         guard.legsLimit(legsUntilEnteringLoop + firstPartialLegInLoop + firstFullLengthLegInLoop);
 
         assertThat(guard.walk().legs()).containsExactly(
@@ -182,6 +186,186 @@ class GuardTest {
     }
 
     @Test
+    @DisplayName("Should force loop by placing a printing press next to guards start position")
+    void shouldForceGuardIntoLoopByPlacingPrintingPress() {
+        var originalRoom = Room.from("""
+                ....#.....
+                ....+---+#
+                ....|...|.
+                ..#.|...|.
+                ....|..#|.
+                ....|...|.
+                .#.O^---+.
+                ........#.
+                #.........
+                ......#...
+                """);
+
+        var guardInOriginalRoom = originalRoom.firstGuard();
+        assertThat(guardInOriginalRoom.isRunningInLoop())
+                .withFailMessage("expecting guard NOT to run into a loop")
+                .isFalse();
+
+        var historianPlacedObstruction = new Room.Position(3, 6);
+        var manipulatedRoom = originalRoom.withAdditional(List.of(new Room.Obstruction('#', historianPlacedObstruction)));
+        var guardInManipulatedRoom = manipulatedRoom.firstGuard();
+
+        assertThat(guardInManipulatedRoom.isRunningInLoop())
+                .withFailMessage("expecting guard to run into a loop")
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Should force loop by placing a stack of failed suit prototypes in the bottom right quadrant")
+    void shouldForceGuardIntoLoopByPlacingStackOfFailedSuitPrototypes() {
+        var originalRoom = Room.from("""
+                ....#.....
+                ....+---+#
+                ....|...|.
+                ..#.|...|.
+                ..+-+-+#|.
+                ..|.|.|.|.
+                .#+-^-+-+.
+                ......O.#.
+                #.........
+                ......#...
+                """);
+
+        var guardInOriginalRoom = originalRoom.firstGuard();
+        assertThat(guardInOriginalRoom.isRunningInLoop())
+                .withFailMessage("expecting guard NOT to run into a loop")
+                .isFalse();
+
+        var historianPlacedObstruction = new Room.Position(6, 7);
+        var manipulatedRoom = originalRoom.withAdditional(List.of(new Room.Obstruction('#', historianPlacedObstruction)));
+        var guardInManipulatedRoom = manipulatedRoom.firstGuard();
+
+        assertThat(guardInManipulatedRoom.isRunningInLoop())
+                .withFailMessage("expecting guard to run into a loop")
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Should force loop by placing a crate of chimney-squeeze prototype fabric next to the standing desk")
+    void shouldForceGuardIntoLoopByPlacingCrateOfChimneySqueezePrototypeFabric() {
+        var originalRoom = Room.from("""
+                ....#.....
+                ....+---+#
+                ....|...|.
+                ..#.|...|.
+                ..+-+-+#|.
+                ..|.|.|.|.
+                .#+-^-+-+.
+                .+----+O#.
+                #+----+...
+                ......#...
+                """);
+
+        var guardInOriginalRoom = originalRoom.firstGuard();
+        assertThat(guardInOriginalRoom.isRunningInLoop())
+                .withFailMessage("expecting guard NOT to run into a loop")
+                .isFalse();
+
+        var historianPlacedObstruction = new Room.Position(7, 7);
+        var manipulatedRoom = originalRoom.withAdditional(List.of(new Room.Obstruction('#', historianPlacedObstruction)));
+        var guardInManipulatedRoom = manipulatedRoom.firstGuard();
+
+        assertThat(guardInManipulatedRoom.isRunningInLoop())
+                .withFailMessage("expecting guard to run into a loop")
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Should force loop by placing an alchemical retroencabulator near the bottom left")
+    void shouldForceGuardIntoLoopByPlacingAlchemicalRetroencabulator() {
+        var originalRoom = Room.from("""
+                ....#.....
+                ....+---+#
+                ....|...|.
+                ..#.|...|.
+                ..+-+-+#|.
+                ..|.|.|.|.
+                .#+-^-+-+.
+                ..|...|.#.
+                #O+---+...
+                ......#...
+                """);
+
+        var guardInOriginalRoom = originalRoom.firstGuard();
+        assertThat(guardInOriginalRoom.isRunningInLoop())
+                .withFailMessage("expecting guard NOT to run into a loop")
+                .isFalse();
+
+        var historianPlacedObstruction = new Room.Position(1, 8);
+        var manipulatedRoom = originalRoom.withAdditional(List.of(new Room.Obstruction('#', historianPlacedObstruction)));
+        var guardInManipulatedRoom = manipulatedRoom.firstGuard();
+
+        assertThat(guardInManipulatedRoom.isRunningInLoop())
+                .withFailMessage("expecting guard to run into a loop")
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Should force loop by placing the alchemical retroencabulator a bit to the right")
+    void shouldForceGuardIntoLoopByPlacingAlchemicalRetroencabulatorABitToTheRight() {
+        var originalRoom = Room.from("""
+                ....#.....
+                ....+---+#
+                ....|...|.
+                ..#.|...|.
+                ..+-+-+#|.
+                ..|.|.|.|.
+                .#+-^-+-+.
+                ....|.|.#.
+                #..O+-+...
+                ......#...
+                """);
+
+        var guardInOriginalRoom = originalRoom.firstGuard();
+        assertThat(guardInOriginalRoom.isRunningInLoop())
+                .withFailMessage("expecting guard NOT to run into a loop")
+                .isFalse();
+
+        var historianPlacedObstruction = new Room.Position(3, 8);
+        var manipulatedRoom = originalRoom.withAdditional(List.of(new Room.Obstruction('#', historianPlacedObstruction)));
+        var guardInManipulatedRoom = manipulatedRoom.firstGuard();
+
+        assertThat(guardInManipulatedRoom.isRunningInLoop())
+                .withFailMessage("expecting guard to run into a loop")
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Should force loop by placing a tank of sovereign glue right next to the tank of universal solvent")
+    void shouldForceGuardIntoLoopByPlacingTankOfSovereignGlue() {
+        var originalRoom = Room.from("""
+                ....#.....
+                ....+---+#
+                ....|...|.
+                ..#.|...|.
+                ..+-+-+#|.
+                ..|.|.|.|.
+                .#+-^-+-+.
+                .+----++#.
+                #+----++..
+                ......#O..
+                """);
+
+        var guardInOriginalRoom = originalRoom.firstGuard();
+        assertThat(guardInOriginalRoom.isRunningInLoop())
+                .withFailMessage("expecting guard NOT to run into a loop")
+                .isFalse();
+
+        var historianPlacedObstruction = new Room.Position(7, 9);
+        var manipulatedRoom = originalRoom.withAdditional(List.of(new Room.Obstruction('#', historianPlacedObstruction)));
+        var guardInManipulatedRoom = manipulatedRoom.firstGuard();
+
+        assertThat(guardInManipulatedRoom.isRunningInLoop())
+                .withFailMessage("expecting guard to run into a loop")
+                .isTrue();
+    }
+
+    @Test
     @DisplayName("Should recognize a loop walk")
     void shouldRecognizeLoopWalk() {
         var room = Room.from("""
@@ -192,7 +376,7 @@ class GuardTest {
                 ...#.
                 """);
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(guard.isRunningInLoop()).isTrue();
     }
@@ -206,7 +390,7 @@ class GuardTest {
                 ...^..
                 ......""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(guard.isRunningInLoop()).isFalse();
     }
@@ -219,7 +403,7 @@ class GuardTest {
                 ...
                 ...""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
         var walk = new Guard.Walk(guard);
         var leg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsRoomBorder);
 
@@ -235,7 +419,7 @@ class GuardTest {
                 ...
                 #..""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
         var walk = new Guard.Walk(guard);
 
         var startLeg = new Leg<>(new Room.Position(0, 0), SOUTH, 1, hitsObstruction);
@@ -258,7 +442,7 @@ class GuardTest {
                 ...
                 ...""");
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
         var walk = new Guard.Walk(guard);
 
         var startLeg = new Leg<>(new Room.Position(0, 0), SOUTH, 2, hitsObstruction);
@@ -283,7 +467,7 @@ class GuardTest {
                 ...#.
                 """);
 
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
         var walk = new Guard.Walk(guard);
 
         var toEast = new Leg<>(new Room.Position(0, 1), EAST, 3, hitsObstruction);

@@ -74,7 +74,7 @@ class Room {
     private int currentX = 0;
 
     private List<Obstruction> obstructions = new ArrayList<>();
-    private final List<Guard> guards = new ArrayList<>();
+    private List<Guard> guards = new ArrayList<>();
 
     public static Room from(Reader input) {
         return new Room(input);
@@ -90,6 +90,9 @@ class Room {
 
     Room(List<Obstruction> obstructions, List<Guard> guards) {
         this.obstructions = obstructions;
+        this.guards = guards.stream()
+                .map(guard -> new Guard(this, guard.startPosition(), guard.startFacing().symbol()))
+                .toList();
     }
 
     Room withAdditional(List<Obstruction> obstructions) {
@@ -243,6 +246,10 @@ class Room {
         return guards;
     }
 
+    Guard firstGuard() {
+        return guards.getFirst();
+    }
+
     private void initializeFrom(Reader input) {
         // dirty trick to make it accessible to the consumer
         final int[] lastCodePoint = new int[1];
@@ -296,7 +303,7 @@ class Room {
 
     static Optional<Tile> tileFrom(int codePoint) {
         return switch ((char) codePoint) {
-            case '.' -> Optional.of(Tile.EMPTY);
+            case '.', 'O', '|', '+', '-' -> Optional.of(Tile.EMPTY);
             case '#' -> Optional.of(Tile.OBSTRUCTION);
             case '^' -> Optional.of(Tile.GUARD_FACING_NORTH);
             case '>' -> Optional.of(Tile.GUARD_FACING_EAST);

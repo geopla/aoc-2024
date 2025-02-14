@@ -37,10 +37,17 @@ class RoomTest {
                 ......""");
 
         var additionalObstruction = new Room.Obstruction('#', new Position(0, 2));
-
         Room modifiedRoom = room.withAdditional(List.of(additionalObstruction));
 
         assertThat(modifiedRoom.obstructions()).contains(additionalObstruction);
+
+        // TODO little bit sloppy but we have only one guard yet
+        var guard = modifiedRoom.guards().getFirst();
+        assertAll(
+                () -> assertThat(guard.room()).isEqualTo(modifiedRoom),
+                () -> assertThat(guard.startPosition()).isEqualTo(new Position(2, 1)),
+                () -> assertThat(guard.startFacing()).isEqualTo(NORTH)
+        );
     }
 
     @Test
@@ -304,7 +311,13 @@ class RoomTest {
 
     static Stream<Arguments> recognizeValidRoomTiles() {
         return Stream.of(
-           arguments(Character.codePointAt(".", 0), Room.Tile.EMPTY)
+           arguments(Character.codePointAt(".", 0), Room.Tile.EMPTY),
+           arguments(Character.codePointAt("O", 0), Room.Tile.EMPTY),
+           arguments(Character.codePointAt("#", 0), Room.Tile.OBSTRUCTION),
+           arguments(Character.codePointAt("^", 0), Room.Tile.GUARD_FACING_NORTH),
+           arguments(Character.codePointAt(">", 0), Room.Tile.GUARD_FACING_EAST),
+           arguments(Character.codePointAt("v", 0), Room.Tile.GUARD_FACING_SOUTH),
+           arguments(Character.codePointAt("<", 0), Room.Tile.GUARD_FACING_WEST)
         );
     }
 
