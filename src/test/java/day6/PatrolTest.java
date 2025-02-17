@@ -16,8 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PatrolTest {
 
-    private Lifecycle.Computed hitsObstruction = new Lifecycle.Computed(Terminator.OBSTRUCTION);
-    private Lifecycle.Computed hitsRoomBorder = new Lifecycle.Computed(Terminator.BORDER);
+    Lifecycle.Computed hitsObstruction = new Lifecycle.Computed(Terminator.OBSTRUCTION);
+    Lifecycle.Computed hitsRoomBorder = new Lifecycle.Computed(Terminator.BORDER);
 
     @Test
     @DisplayName("Should provide DISTINCT positions visited")
@@ -30,7 +30,7 @@ class PatrolTest {
                 ..^..#.""");
 
         var patrol = new Patrol(room);
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(patrol.distinctPositionsVisitedBy(guard)).containsExactly(
                 // start
@@ -65,7 +65,7 @@ class PatrolTest {
         var room = roomFromResource("day6-example-input.txt");
 
         var patrol = new Patrol(room);
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(patrol.distinctPositionsVisitedBy(guard)).containsExactly(
                 // start
@@ -127,7 +127,7 @@ class PatrolTest {
     @DisplayName("Should provide guard walk from challenge example")
     void shouldProvideGuardWalkFromChallengeExample() {
         var room = roomFromResource("day6-example-input.txt");
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         var legs = guard.walk().legs();
 
@@ -152,7 +152,7 @@ class PatrolTest {
         var room = roomFromResource("day6-example-input.txt");
 
         var patrol = new Patrol(room);
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(patrol.distinctPositionsCountVisitedBy(guard)).isEqualTo(41);
     }
@@ -163,7 +163,7 @@ class PatrolTest {
         var room = roomFromResource("day6-input.txt");
 
         var patrol = new Patrol(room);
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(patrol.distinctPositionsCountVisitedBy(guard)).isEqualTo(4776);
     }
@@ -185,6 +185,28 @@ class PatrolTest {
         );
     }
 
+    @Test
+    @DisplayName("Should count stuck positions from challenge example")
+    void shouldCountStuckPositionsFromChallengeExample() {
+        var room = roomFromResource("day6-example-input.txt");
+
+        var patrol = new Patrol(room);
+        var guard = room.firstGuard();
+
+        assertThat(patrol.stuckPlacementPositionsCount(guard)).isEqualTo(6);
+    }
+
+    @Test
+    @DisplayName("Should count stuck positions from challenge")
+    void shouldCountStuckPositionsFromChallenge() {
+        var room = roomFromResource("day6-input.txt");
+
+        var patrol = new Patrol(room);
+        var guard = room.firstGuard();
+
+        assertThat(patrol.stuckPlacementPositionsCount(guard)).isEqualTo(1586);
+    }
+
     @ParameterizedTest
     @CsvSource({
             "0, '...#..'",
@@ -201,7 +223,7 @@ class PatrolTest {
                 ......""");
 
         var patrol = new Patrol(room);
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         assertThat(patrol.visitsInLineByGuard(lineNumber, guard)).isEqualTo(expectedLine);
     }
@@ -216,7 +238,7 @@ class PatrolTest {
                 ......""");
 
         var patrol = new Patrol(room);
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         String visits = patrol.visitsInLinesBy(guard);
 
@@ -233,7 +255,7 @@ class PatrolTest {
         var room = roomFromResource("day6-example-input.txt");
 
         var patrol = new Patrol(room);
-        var guard = room.guards().getFirst();
+        var guard = room.firstGuard();
 
         String visits = patrol.visitsInLinesBy(guard);
 

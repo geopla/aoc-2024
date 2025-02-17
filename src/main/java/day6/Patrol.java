@@ -28,6 +28,10 @@ class Patrol {
                 .filter(isStuckInLoopByObstructionPlacement(guard));
     }
 
+    long stuckPlacementPositionsCount(Guard guard) {
+        return stuckPlacementsPositions(guard).count();
+    }
+
     private static Predicate<Room.Position> isStuckInLoopByObstructionPlacement(Guard guard) {
         return position -> {
             var manipulatedRoom = guard.room().withAdditional(List.of(new Room.Obstruction('#', position)));
