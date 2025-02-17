@@ -201,3 +201,27 @@ Just reasoning ...
 - separate tests into real unit test, integration tests and acceptance tests
 - invest in readability, especially when using functional style
 - reading a file as stream as a whole is not worth the hassle, just use BufferedReader.lines() instead
+
+## Day 7 - Bridge Repair
+
+### Domain Language
+- **Calibration Equation**
+  - Result
+  - Operands
+  - Operator Sequence?
+- **Operator**
+  - Symbol `+`, `*`
+  - BiFunction
+
+### Requirements
+- Operators are always evaluated left-to-right, not according to precedence rules.
+- Numbers in the equations cannot be rearranged.
+
+### The problem to solve
+Given a sequence of operands and the expected result, find a permutation of operations which will solve
+the calibration equation.
+
+- Brute force will do?
+- How to generate the permutations?
+
+### The PLN
