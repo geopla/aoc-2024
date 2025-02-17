@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
 
 import static day6.CardinalDirection.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -165,6 +166,23 @@ class PatrolTest {
         var guard = room.guards().getFirst();
 
         assertThat(patrol.distinctPositionsCountVisitedBy(guard)).isEqualTo(4776);
+    }
+
+    @Test
+    @DisplayName("Should find all possible obstruction placements to force guard into loop from challenge example")
+    void shouldFindAllPossibleObstructionPlacementsToForceGuardLoop() {
+        var room = roomFromResource("day6-example-input.txt");
+
+        Stream<Position> stuckPlacements = new Patrol(room).stuckPlacementsPositions(room.firstGuard());
+
+        assertThat(stuckPlacements).containsExactlyInAnyOrder(
+                new Room.Position(3, 6),
+                new Room.Position(6, 7),
+                new Room.Position(7, 7),
+                new Room.Position(1, 8),
+                new Room.Position(3, 8),
+                new Room.Position(7, 9)
+        );
     }
 
     @ParameterizedTest

@@ -19,7 +19,7 @@ import static java.util.Collections.unmodifiableList;
 
 class Room {
 
-    record Size(int width, int length) {
+    record Size(int width, int depth) {
     }
 
     record Position(int x, int y) {
@@ -88,7 +88,9 @@ class Room {
         initializeFrom(input);
     }
 
-    Room(List<Obstruction> obstructions, List<Guard> guards) {
+    Room( Size size, List<Obstruction> obstructions, List<Guard> guards) {
+        this.width = size.width();
+        this.depth = size.depth();
         this.obstructions = obstructions;
         this.guards = guards.stream()
                 .map(guard -> new Guard(this, guard.startPosition(), guard.startFacing().symbol()))
@@ -111,7 +113,7 @@ class Room {
         var allObstructions = new ArrayList<>(this.obstructions);
         allObstructions.addAll(obstructions);
 
-        return new Room(allObstructions, this.guards);
+        return new Room(new Size(width, depth), allObstructions, this.guards);
     }
 
     Leg<Computed> realize(Leg<Planned> legPlanned) {

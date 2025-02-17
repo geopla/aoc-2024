@@ -180,7 +180,7 @@ class GuardTest {
                 new Leg<>(new Room.Position(3, 3), WEST,  1, hitsObstruction),
                 new Leg<>(new Room.Position(2, 3), NORTH, 2, hitsObstruction),
 
-                // partial leg is in because loop detection needs repeated full length leg
+                // partial leg is in because loop detection needs repeated full depth leg
                 new Leg<>(new Room.Position(2, 1), EAST,  1, hitsObstruction)
         );
     }

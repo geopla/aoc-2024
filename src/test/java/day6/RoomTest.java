@@ -48,6 +48,8 @@ class RoomTest {
                 () -> assertThat(guard.startPosition()).isEqualTo(new Position(2, 1)),
                 () -> assertThat(guard.startFacing()).isEqualTo(NORTH)
         );
+
+        assertThat(modifiedRoom.size()).isEqualTo(room.size());
     }
 
     @Test

@@ -1,5 +1,7 @@
 package day6;
 
+import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -18,6 +20,21 @@ class Patrol {
 
     long distinctPositionsCountVisitedBy(Guard guard) {
          return distinctPositionsVisitedBy(guard).count();
+    }
+
+    Stream<Room.Position> stuckPlacementsPositions(Guard guard) {
+        return distinctPositionsVisitedBy(guard)
+                .skip(1)
+                .filter(isStuckInLoopByObstructionPlacement(guard));
+    }
+
+    private static Predicate<Room.Position> isStuckInLoopByObstructionPlacement(Guard guard) {
+        return position -> {
+            var manipulatedRoom = guard.room().withAdditional(List.of(new Room.Obstruction('#', position)));
+            var firstGuard = manipulatedRoom.firstGuard();
+
+            return firstGuard.isRunningInLoop();
+        };
     }
 
     String visitsInLineByGuard(int lineNumber, Guard guard) {
@@ -50,7 +67,7 @@ class Patrol {
     }
 
     String visitsInLinesBy(Guard guard) {
-        return IntStream.range(0, room.size().length())
+        return IntStream.range(0, room.size().depth())
                 .boxed()
                 .map(i -> visitsInLineByGuard(i, guard))
                 .collect(Collectors.joining("\n"));
